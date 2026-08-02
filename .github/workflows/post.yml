@@ -1,24 +1,23 @@
-name: post
+name: Alfaze Daily Post
+
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '0 7 * * *'
+    - cron: '30 1 * * *' # Roz subah 7 AM IST pe auto
+  workflow_dispatch: # Manual run ke liye
+
 jobs:
   post:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-      - name: Install deps
-        run: pip install requests Pillow
-      - name: Run poster
+          python-version: '3.10'
+      - name: Install Pillow
+        run: pip install Pillow requests
+      - name: Post to Instagram
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           PAGE_ACCESS_TOKEN: ${{ secrets.PAGE_ACCESS_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: python scripts/post_to_insta.py
