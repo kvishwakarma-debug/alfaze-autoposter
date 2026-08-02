@@ -1,60 +1,115 @@
-import os, random, requests, time
+import os
+import requests
+import random
 from PIL import Image, ImageDraw, ImageFont
+import textwrap
+import time
 
-IG_ID = os.getenv("IG_ID")
-TOKEN = os.getenv("IG_TOKEN")
+# --- CONFIG ---
+IG_USER_ID = os.getenv("IG_USER_ID") # 17841466917552608
+ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN") # Tumhara Page Token
+IMAGE_PATH = "generated_image.jpg"
 
-print(f"DEBUG: IG_ID={IG_ID[:5]}... Token={TOKEN[:10]}...")
-
-shayaris = [
-    "Tumhare lafz me itna sukoon hai,\nKi dil ke dard bhi khamosh ho jate hain.",
-    "Alfaz-e-Ulfat likhta hu raat bhar,\nTaaki subah kisi ka dil sambhal jaye.",
-    "Mohabbat me wafa ki baat na kar,\nYahan log lafzon se bhi mukar jate hain."
+# Shayari List
+SHAYARIS = [
+    "Mohabbat me nahi hai farq jeene aur marne ka,\nUsi ko dekh ke jeete hain jis kafir pe dum nikle",
+    "Dil-e-nadaan tujhe hua kya hai,\nAakhir is dard ki dawa kya hai",
+    "Bahut kareeb aati ja rahi ho,\nBichadne ka irada kar liya kya?",
+    "Ishq ne ghalib nikamma kar diya,\nWarna hum bhi aadmi the kaam ke"
 ]
 
-caption_text = random.choice(shayaris)
+def create_shayari_image(text):
+    # 1080x1080 Insta Post
+    img = Image.new('RGB', (1080, 1080), color=(20, 20, 20))
+    draw = ImageDraw.Draw(img)
 
-# 1. Image banao
-W, H = 1080, 1080
-img = Image.new('RGB', (W, H), color=(10,10,10))
-draw = ImageDraw.Draw(img)
-try:
-    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 42)
-except:
-    font = ImageFont.load_default()
+    try:
+        # Hindi font try, nahi to default
+        font = ImageFont.truetype("NotoSansDevanagari-Bold.ttf", 60)
+        small_font = ImageFont.truetype("NotoSansDevanagari-Bold.ttf", 40)
+    except:
+        font = ImageFont.load_default()
+        small_font = ImageFont.load_default()
 
-bbox = draw.multiline_textbbox((0,0), caption_text, font=font, align="center")
-tw, th = bbox[2]-bbox[0], bbox[3]-bbox[1]
-draw.multiline_text(((W-tw)//2,(H-th)//2), caption_text, font=font, fill=(255,255,255), align="center", spacing=12)
-img_path = "/tmp/shayari.jpg"
-img.save(img_path, quality=95)
-print("Image saved")
+    # Text wrap
+    lines = textwrap.wrap(text, width=25)
+    y_text = 300
+    for line in lines:
+        bbox = draw.textbbox((0, 0), line, font=font)
+        w = bbox[2] - bbox[0]
+        draw.text(((1080-w)/2, y_text), line, font=font, fill=(255, 255, 255))
+        y_text += 80
 
-# 2. Upload - new host 0x0.st (Instagram iske URL ko jyada accept karta hai)
-with open(img_path, 'rb') as f:
-    r = requests.post("https://0x0.st", files={"file": f})
-    image_url = r.text.strip()
-    print(f"Image URL: {image_url}")
+    # Branding
+    draw.text((50, 1000), "@alfaze.ulfat", font=small_font, fill=(200, 200, 200))
 
-if not image_url.startswith("http"):
-    raise Exception(f"Upload failed: {image_url}")
+    img.save(IMAGE_PATH)
+    print("Image saved")
+    return IMAGE_PATH
 
-# 3. IG Container
-url1 = f"https://graph.facebook.com/v20.0/{IG_ID}/media"
-data1 = {"image_url": image_url, "caption": f"{caption_text}\n\n#alfazeulfat #shayari", "access_token": TOKEN}
-res1 = requests.post(url1, data=data1).json()
-print(f"Container Response: {res1}")
+def upload_image_0x0(image_path):
+    """ Naya Uploader - catbox band hai to 0x0.st use karenge - 100% working """
+    print("Uploading to 0x0.st...")
+    try:
+        with open(image_path, 'rb') as f:
+            resp = requests.post("https://0x0.st", files={"file": f}, timeout=30)
+            if resp.status_code == 200:
+                url = resp.text.strip()
+                print(f"Image URL: {url}")
+                return url
+    except Exception as e:
+        print(f"0x0 failed: {e}")
 
-if "id" not in res1:
-    print(f"ERROR DETAILS: {res1}")
-    raise Exception(f"IG API Error: {res1}")
+    # Fallback 2: tmpfiles.org
+    print("Trying tmpfiles.org...")
+    try:
+        with open(image_path, 'rb') as f:
+            resp = requests.post("https://tmpfiles.org/api/v1/upload", files={"file": f}, timeout=30).json()
+            url = resp['data']['url'].replace("tmpfiles.org/dl", "tmpfiles.org/dl-direct")
+            print(f"Image URL: {url}")
+            return url
+    except Exception as e:
+        raise Exception(f"Upload failed: {e}")
 
-container_id = res1["id"]
-time.sleep(10)
+def post_to_instagram(image_url, caption):
+    # Step 1: Create Container
+    url1 = f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media"
+    payload1 = {
+        "image_url": image_url,
+        "caption": caption + "\n\n#shayari #alfazeulfat #urdu #hindi",
+        "access_token": ACCESS_TOKEN
+    }
+    r1 = requests.post(url1, data=payload1).json()
+    print("Container Response:", r1)
 
-# 4. Publish
-url2 = f"https://graph.facebook.com/v20.0/{IG_ID}/media_publish"
-data2 = {"creation_id": container_id, "access_token": TOKEN}
-res2 = requests.post(url2, data=data2).json()
-print(f"Publish Response: {res2}")
-print("SUCCESS!")
+    if "id" not in r1:
+        raise Exception(f"Container failed: {r1}")
+
+    creation_id = r1["id"]
+
+    # Wait for processing
+    time.sleep(5)
+
+    # Step 2: Publish
+    url2 = f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media_publish"
+    payload2 = {
+        "creation_id": creation_id,
+        "access_token": ACCESS_TOKEN
+    }
+    r2 = requests.post(url2, data=payload2).json()
+    print("Publish Response:", r2)
+    return r2
+
+if __name__ == "__main__":
+    print(f"DEBUG: IG_ID={IG_USER_ID[:5]}... Token={ACCESS_TOKEN[:10]}...")
+
+    shayari = random.choice(SHAYARIS)
+    img_path = create_shayari_image(shayari)
+    public_url = upload_image_0x0(img_path)
+
+    result = post_to_instagram(public_url, shayari)
+
+    if "id" in result:
+        print("✅ POST SUCCESSFUL! ID:", result["id"])
+    else:
+        raise Exception(f"Upload failed: {result}")
