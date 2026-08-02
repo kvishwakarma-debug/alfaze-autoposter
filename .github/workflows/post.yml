@@ -1,0 +1,22 @@
+name: Alfaze 12:30 PM Post
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install deps
+        run: pip install requests Pillow
+      - name: Run poster
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_ID: ${{ secrets.IG_ID }}
+        run: python post.py
