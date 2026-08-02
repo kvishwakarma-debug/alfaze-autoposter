@@ -1,0 +1,22 @@
+name: Alfaze Ulfat Auto Post
+on:
+  schedule:
+    - cron: '30 7 * * *' # Roz 1 PM IST auto
+  workflow_dispatch: # Manual test ke liye
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install libs
+        run: pip install Pillow requests
+      - name: Run Auto Post
+        env:
+          IG_ID: ${{ secrets.IG_ID }}
+          IG_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python scripts/post_to_insta.py
