@@ -57,7 +57,10 @@ HASHTAGS = {
 28: "#Samundar #BeachChai #Lehrein",
 29: "#CanteenChai #Dosti #CollegeDays",
 30: "#Alaav #BonfireNights #WinterChai",
-31: def create_chai_post(text, day_num):
+31: "#PehliChai #MorningThoughts #ChaiAurKhayal"
+}
+
+def create_chai_post(text, day_num):
     prompt = BG_PROMPTS.get(day_num, "kulhad chai cinematic warm light")
     encoded = urllib.parse.quote(prompt + ", photorealistic, warm cinematic, 4k")
     bg_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1350&nologo=true&seed={day_num}"
@@ -67,7 +70,6 @@ HASHTAGS = {
 
     img = Image.open("bg.jpg").convert("RGB").resize((1080,1350))
     draw = ImageDraw.Draw(img, "RGBA")
-    # BLACK BOX HATA DIYA - ab transparent rahega
 
     try:
         font_main = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf", 46)
@@ -85,26 +87,12 @@ HASHTAGS = {
         bbox = draw.textbbox((0,0), line, font=font_main)
         w = bbox[2]-bbox[0]
         x = (1080-w)//2
-        # Sirf white text with black stroke, piche koi box nahi
         draw.text((x,y), line, font=font_main, fill="white", stroke_width=4, stroke_fill="black")
         y+=65
 
-    # Niche wala English ke liye alag font - ab box nahi ayega
     watermark = f"@alfaze.ulfat | Day {day_num}/365"
     draw.text((35, 1300), watermark, font=font_watermark, fill="white", stroke_width=2, stroke_fill="black")
 
-    os.makedirs("public/images", exist_ok=True)
-    filename = f"day{day_num}_{int(datetime.now().timestamp())}.jpg"
-    filepath = f"public/images/{filename}"
-    img.save(filepath, "JPEG", quality=92)
-
-    subprocess.run(["git","config","--global","user.name","Alfaze Bot"], check=True)
-    subprocess.run(["git","config","--global","user.email","bot@alfaze.com"], check=True)
-    subprocess.run(["git","add",filepath], check=True)
-    subprocess.run(["git","commit","-m",f"Add Day {day_num}"], check=True)
-    subprocess.run(["git","push"], check=True)
-    time.sleep(12)
-    return f"https://raw.githubusercontent.com/{REPO}/main/{filepath}"
     os.makedirs("public/images", exist_ok=True)
     filename = f"day{day_num}_{int(datetime.now().timestamp())}.jpg"
     filepath = f"public/images/{filename}"
