@@ -3,7 +3,6 @@ on:
   schedule:
     - cron: '0 7 * * *'
   workflow_dispatch:
-
 jobs:
   post:
     runs-on: ubuntu-latest
@@ -17,6 +16,7 @@ jobs:
         run: pip install requests Pillow
       - name: Run poster
         env:
-          IG_TOKEN: ${{ secrets.IG_TOKEN }}
-          IG_ID: ${{ secrets.IG_ID }}
-        run: python post.py
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          PAGE_ACCESS_TOKEN: ${{ secrets.PAGE_ACCESS_TOKEN }}
+          PAGE_ID: ${{ secrets.PAGE_ID }}
+        run: python scripts/post_to_insta.py
