@@ -6,7 +6,6 @@ IG_USER_ID = os.getenv("IG_USER_ID")
 ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
 REPO = os.getenv("GITHUB_REPOSITORY")
 
-# 17 se 30 tak tumhari shayaris
 SHAYARIS = {
 17: "सुबह की चाय में तेरी यादों का धुआँ है,\nहर घूँट के साथ तू और याद आता है।",
 18: "बारिश, चाय और तुम्हारी बातें,\nतीनों का नशा उतरता ही नहीं है।",
@@ -74,11 +73,15 @@ def create_chai_post(text, day_num):
     draw.rectangle([(60, 380), (1020, 920)], fill=(0,0,0,130))
 
     try:
-        font_main = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 42)
-        font_small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 26)
+        font_main = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf", 46)
+        font_small = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf", 28)
     except:
-        font_main = ImageFont.load_default()
-        font_small = ImageFont.load_default()
+        try:
+            font_main = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 44)
+            font_small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 26)
+        except:
+            font_main = ImageFont.load_default()
+            font_small = ImageFont.load_default()
 
     y = 460
     for line in text.split("\n"):
@@ -128,16 +131,12 @@ def post_to_instagram(image_url, caption):
     return r2
 
 if __name__ == "__main__":
-    START_DATE = date(2026, 7, 5) # Day 1 = 5 July
+    START_DATE = date(2026, 7, 5)
     today_day = (date.today() - START_DATE).days + 1
-
-    # Agar aaj 2 Aug hai to Day 29 ayega auto
     if today_day < 17: today_day = 17
     if today_day > 31: today_day = random.choice(list(SHAYARIS.keys()))
-
     shayari = SHAYARIS.get(today_day, SHAYARIS[29])
     print(f"Posting Day {today_day}")
-
     public_url = create_chai_post(shayari, today_day)
     caption = make_caption(shayari, today_day)
     post_to_instagram(public_url, caption)
