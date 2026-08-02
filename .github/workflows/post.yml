@@ -1,11 +1,13 @@
-name: Alfaze 12:30 PM Post
+name: post
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 7 * * *'
-  workflow_dispatch:
 jobs:
   post:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -18,5 +20,5 @@ jobs:
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           PAGE_ACCESS_TOKEN: ${{ secrets.PAGE_ACCESS_TOKEN }}
-          PAGE_ID: ${{ secrets.PAGE_ID }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/post_to_insta.py
