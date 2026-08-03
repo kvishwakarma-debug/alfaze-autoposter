@@ -219,10 +219,15 @@ if __name__ == "__main__":
         today_day = random.choice(list(SHAYARIS.keys()))
 
     # FIX - Duplicate post rokne ke liye
-    existing = glob.glob(f"public/images/day{today_day}_*.jpg")
-    if existing:
+       existing = glob.glob(f"public/images/day{today_day}_*.jpg")
+    event_name = os.getenv("GITHUB_EVENT_NAME")
+    # Sirf schedule pe skip karo, manual run pe allow karo
+    if existing and event_name == "schedule":
         print(f"Day {today_day} already posted, skipping")
         exit(0)
+    
+    if existing:
+        print(f"Day {today_day} already exists but manual run - continuing for testing")
 
     shayari = SHAYARIS.get(today_day, SHAYARIS[30])
     print(f"Posting Day {today_day}")
