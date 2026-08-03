@@ -92,9 +92,15 @@ def image_to_reel_with_music(image_path, day_num):
     try:
         music_path = ensure_music()
         out = f"public/images/reel_day{day_num}_{int(datetime.now().timestamp())}.mp4"
-        clip = ImageClip(image_path).set_duration(7)
-        audio = AudioFileClip(music_path).subclip(0,7).volumex(0.35)
-        clip = clip.set_audio(audio)
+        print(f"Creating reel: {out}")
+        clip = ImageClip(image_path).set_duration(7).resize((1080,1920))
+        if music_path and os.path.exists(music_path):
+            try:
+                audio = AudioFileClip(music_path).subclip(0,7).volumex(0.35)
+                clip = clip.set_audio(audio)
+                print("✅ Music attached")
+            except Exception as e:
+                print(f"Audio fail, silent reel: {e}")
         clip.write_videofile(out, fps=24, codec='libx264', audio_codec='aac', logger=None)
         subprocess.run(["git","add",out], check=True)
         subprocess.run(["git","commit","-m",f"Add Reel {day_num}"], check=True)
@@ -102,7 +108,7 @@ def image_to_reel_with_music(image_path, day_num):
         time.sleep(12)
         return f"https://raw.githubusercontent.com/{REPO}/main/{out}"
     except Exception as e:
-        print("Reel create fail:", e)
+        print(f"Reel create fail: {e}")
         return None
 
 def make_caption(shayari, day_num):
@@ -124,10 +130,10 @@ if __name__ == "__main__":
     if today_day < 17: today_day = 17
     if today_day > 31: today_day = random.choice(list(SHAYARIS.keys()))
 
-    # DUPLICATE CHECK - Agar aaj ka Day image already push hai to skip
-    existing = glob.glob(f"public/images/day{today_day}_*.jpg") + glob.glob(f"public/images/day{today_day}*.jpg")
+    # Duplicate check for scheduled runs
+    existing = glob.glob(f"public/images/day{today_day}_*.jpg")
     if existing and os.getenv("GITHUB_EVENT_NAME") == "schedule":
-        print(f"Day {today_day} already exists, skipping scheduled run")
+        print(f"Day {today_day} already posted, skipping")
         exit(0)
 
     shayari = SHAYARIS.get(today_day, SHAYARIS[29])
@@ -136,7 +142,6 @@ if __name__ == "__main__":
     caption = make_caption(shayari, today_day)
     post_to_instagram(public_url, caption)
 
-    # Reel + Story + FB
     reel_url = image_to_reel_with_music(local_path, today_day)
     if reel_url:
         print("Reel URL:", reel_url)
