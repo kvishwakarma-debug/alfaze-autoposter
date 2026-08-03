@@ -1,3 +1,12 @@
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from publishers.music_mixer import add_music_to_video, ensure_music
+from publishers.story_publisher import post_to_story
+from publishers.facebook_publisher import post_to_fb_reel
+
+from publishers.music_mixer import add_music_to_video, ensure_music
+
 from publishers.music_mixer import ensure_music
 from publishers.story_publisher import post_to_story
 from publishers.facebook_publisher import post_to_fb_reel
