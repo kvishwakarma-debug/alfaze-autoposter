@@ -5,8 +5,7 @@ def ensure_music():
     os.makedirs("assets", exist_ok=True)
     path = "assets/sukoon_lofi.mp3"
 
-    # Already exists and valid?
-    if os.path.exists(path) and os.path.getsize(path) > 50000:
+    if os.path.exists(path) and os.path.getsize(path) > 100000:
         return path
 
     urls = [
@@ -18,14 +17,16 @@ def ensure_music():
         try:
             print(f"Trying: {url}")
             r = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
-            if len(r.content) > 50000:
+            if len(r.content) > 100000:
                 with open(path, "wb") as f:
                     f.write(r.content)
                 print(f"✅ Music OK: {len(r.content)} bytes")
                 return path
+            else:
+                print(f"Too small: {len(r.content)} bytes, skipping")
         except Exception as e:
             print(f"Fail: {e}")
             continue
 
-    print("⚠️ Music download failed, reel will be silent")
+    print("⚠️ Music download failed, will try silent reel")
     return None
