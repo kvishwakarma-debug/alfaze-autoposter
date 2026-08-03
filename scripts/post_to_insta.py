@@ -19,8 +19,6 @@ IG_USER_ID = os.getenv("IG_USER_ID")
 ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
 PAGE_ID = os.getenv("PAGE_ID")
 REPO = os.getenv("GITHUB_REPOSITORY")
-
-# NEW SECRETS
 FB_PROFILE_ID = os.getenv("FB_PROFILE_ID")
 FB_USER_TOKEN = os.getenv("FB_USER_TOKEN")
 
@@ -188,8 +186,6 @@ def post_to_both_fb(video_url, feed_url, caption):
     print(f"DEBUG - PAGE_ID exists: {bool(PAGE_ID)}")
     print(f"DEBUG - FB_PROFILE_ID exists: {bool(FB_PROFILE_ID)} -> {FB_PROFILE_ID}")
     print(f"DEBUG - FB_USER_TOKEN exists: {bool(FB_USER_TOKEN)} -> Token length {len(FB_USER_TOKEN) if FB_USER_TOKEN else 0}")
-
-    # 1. Alfaz.e.Ulfat Page
     if PAGE_ID:
         try:
             print(f"Posting to FB Page {PAGE_ID}")
@@ -197,8 +193,6 @@ def post_to_both_fb(video_url, feed_url, caption):
             post_to_fb_feed(feed_url, PAGE_ID, ACCESS_TOKEN, caption)
         except Exception as e:
             print(f"FB Page post failed: {e}")
-
-    # 2. Alfaz EUlfat Professional Profile - MAIN
     if FB_PROFILE_ID and FB_USER_TOKEN:
         try:
             print(f"Posting to FB Professional Profile {FB_PROFILE_ID}")
@@ -217,18 +211,13 @@ if __name__ == "__main__":
         today_day = 17
     if today_day > 31:
         today_day = random.choice(list(SHAYARIS.keys()))
-
-    # FIX - Duplicate post rokne ke liye
-       existing = glob.glob(f"public/images/day{today_day}_*.jpg")
+    existing = glob.glob(f"public/images/day{today_day}_*.jpg")
     event_name = os.getenv("GITHUB_EVENT_NAME")
-    # Sirf schedule pe skip karo, manual run pe allow karo
     if existing and event_name == "schedule":
         print(f"Day {today_day} already posted, skipping")
         exit(0)
-    
     if existing:
         print(f"Day {today_day} already exists but manual run - continuing for testing")
-
     shayari = SHAYARIS.get(today_day, SHAYARIS[30])
     print(f"Posting Day {today_day}")
     public_url, reel_local_path = create_chai_post(shayari, today_day)
