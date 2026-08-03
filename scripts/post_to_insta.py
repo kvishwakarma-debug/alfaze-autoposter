@@ -7,7 +7,8 @@ if not hasattr(Image, 'ANTIALIAS'):
 
 from publishers.music_mixer import ensure_music
 from publishers.story_publisher import post_to_story
-from publishers.facebook_publisher import post_to_fb_reel
+from publishers.facebook_publisher import post_to_fb_reel, post_to_fb_feed
+from publishers.threads_publisher import post_to_threads
 
 import requests, random, time, subprocess, urllib.parse, glob
 from PIL import Image, ImageDraw, ImageFont
@@ -109,34 +110,43 @@ def create_chai_post(text, day_num):
 def image_to_reel_with_music(image_path, day_num):
     try:
         music_path = ensure_music()
-        out = f"public/images/reel_day{day_num}_{int(datetime.now().timestamp())}.mp4"
-        print(f"Creating HD reel: {out}")
-        clip = ImageClip(image_path).set_duration(7)
-        if music_path and os.path.exists(music_path):
-            try:
-                audio = AudioFileClip(music_path)
-                if audio.duration >= 2:
-                    if audio.duration < 7:
-                        from moviepy.audio.fx.all import audio_loop
-                        audio = audio_loop(audio, duration=7)
-                    else:
-                        audio = audio.subclip(0,7)
-                    audio = audio.volumex(0.4)
-                    clip = clip.set_audio(audio)
-                    print("Music attached")
-            except Exception as e:
-                print(f"Audio fail: {e}")
-        clip.write_videofile(out, fps=30, codec='libx264', audio_codec='aac', bitrate="8000k", logger=None)
-        subprocess.run(["git","add",out], check=True)
-        subprocess.run(["git","commit","-m",f"Add Reel {day_num} HD"], check=True)
+        ts = int(datetime.now().timestamp())
+        out_hd = f"public/images/reel_day{day_num}_{ts}.mp4"
+        out_story = f"public/images/story_day{day_num}_{ts}.mp4"
+        print(f"Creating HD reels: {out_hd} and {out_story}")
+
+        def make_video(out_path, bitrate):
+            clip = ImageClip(image_path).set_duration(7)
+            if music_path and os.path.exists(music_path):
+                try:
+                    audio = AudioFileClip(music_path)
+                    if audio.duration >= 2:
+                        if audio.duration < 7:
+                            from moviepy.audio.fx.all import audio_loop
+                            audio = audio_loop(audio, duration=7)
+                        else:
+                            audio = audio.subclip(0,7)
+                        audio = audio.volumex(0.4)
+                        clip = clip.set_audio(audio)
+                except Exception as e:
+                    print(f"Audio attach fail: {e}")
+            clip.write_videofile(out_path, fps=30, codec='libx264', audio_codec='aac', bitrate=bitrate, logger=None)
+            return out_path
+
+        make_video(out_hd, "5000k")
+        make_video(out_story, "1500k")
+
+        subprocess.run(["git","add",out_hd, out_story], check=True)
+        subprocess.run(["git","commit","-m",f"Add Reels {day_num}"], check=True)
         subprocess.run(["git","push"], check=True)
         time.sleep(15)
-        return f"https://raw.githubusercontent.com/{REPO}/main/{out}"
+        base = f"https://raw.githubusercontent.com/{REPO}/main/"
+        return base+out_hd, base+out_story
     except Exception as e:
         print(f"Reel fail: {e}")
         import traceback
         traceback.print_exc()
-        return None
+        return None, None
 
 def make_caption(shayari, day_num):
     tag = HASHTAGS.get(day_num, "#ChaiShayari")
@@ -163,7 +173,7 @@ def post_to_insta_reel(video_url, caption):
     print("Reel Container:", r1)
     if "id" not in r1:
         return r1
-    for i in range(6):
+    for i in range(12):
         time.sleep(5)
         s = requests.get(f"https://graph.facebook.com/v20.0/{r1['id']}?fields=status_code&access_token={ACCESS_TOKEN}").json()
         print(f"Reel status: {s}")
@@ -189,13 +199,16 @@ if __name__ == "__main__":
     public_url, reel_local_path = create_chai_post(shayari, today_day)
     caption = make_caption(shayari, today_day)
     post_to_instagram(public_url, caption)
-    reel_url = image_to_reel_with_music(reel_local_path, today_day)
-    if reel_url:
-        print("Reel URL:", reel_url)
+    reel_url_hd, reel_url_story = image_to_reel_with_music(reel_local_path, today_day)
+    if reel_url_hd:
+        print(f"HD URL: {reel_url_hd}")
+        print(f"Story URL: {reel_url_story}")
         try:
-            post_to_story(reel_url, IG_USER_ID, ACCESS_TOKEN)
-            post_to_insta_reel(reel_url, caption)
+            post_to_insta_reel(reel_url_hd, caption)
+            post_to_story(reel_url_story, IG_USER_ID, ACCESS_TOKEN)
             if PAGE_ID:
-                post_to_fb_reel(reel_url, PAGE_ID, ACCESS_TOKEN, caption)
+                post_to_fb_reel(reel_url_hd, PAGE_ID, ACCESS_TOKEN, caption)
+                post_to_fb_feed(public_url, PAGE_ID, ACCESS_TOKEN, caption)
+            post_to_threads(public_url, caption)
         except Exception as e:
             print(f"Extra post failed: {e}")
