@@ -16,9 +16,13 @@ from datetime import date, datetime
 from moviepy.editor import ImageClip, AudioFileClip
 
 IG_USER_ID = os.getenv("IG_USER_ID")
-ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
-PAGE_ID = os.getenv("PAGE_ID")
+ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN") # Page Token - Never Expiring
+PAGE_ID = os.getenv("PAGE_ID") # Alfaz.e.Ulfat Page ID
 REPO = os.getenv("GITHUB_REPOSITORY")
+
+# NEW - Professional Profile
+FB_PROFILE_ID = os.getenv("FB_PROFILE_ID") # 61559688747853
+FB_USER_TOKEN = os.getenv("FB_USER_TOKEN") # 60 din wala token
 
 SHAYARIS = {
 17: "सुबह की चाय में तेरी यादों का धुआँ है,\nहर घूँट के साथ तू और याद आता है।",
@@ -114,7 +118,6 @@ def image_to_reel_with_music(image_path, day_num):
         out_hd = f"public/images/reel_day{day_num}_{ts}.mp4"
         out_story = f"public/images/story_day{day_num}_{ts}.mp4"
         print(f"Creating HD reels: {out_hd} and {out_story}")
-
         def make_video(out_path, bitrate):
             clip = ImageClip(image_path).set_duration(7)
             if music_path and os.path.exists(music_path):
@@ -132,10 +135,8 @@ def image_to_reel_with_music(image_path, day_num):
                     print(f"Audio attach fail: {e}")
             clip.write_videofile(out_path, fps=30, codec='libx264', audio_codec='aac', bitrate=bitrate, logger=None)
             return out_path
-
         make_video(out_hd, "5000k")
         make_video(out_story, "1500k")
-
         subprocess.run(["git","add",out_hd, out_story], check=True)
         subprocess.run(["git","commit","-m",f"Add Reels {day_num}"], check=True)
         subprocess.run(["git","push"], check=True)
@@ -183,6 +184,25 @@ def post_to_insta_reel(video_url, caption):
     print("Reel Publish:", r2)
     return r2
 
+def post_to_both_fb(video_url, feed_url, caption):
+    # 1. Alfaz.e.Ulfat Page
+    if PAGE_ID:
+        try:
+            print(f"Posting to FB Page {PAGE_ID}")
+            post_to_fb_reel(video_url, PAGE_ID, ACCESS_TOKEN, caption)
+            post_to_fb_feed(feed_url, PAGE_ID, ACCESS_TOKEN, caption)
+        except Exception as e:
+            print(f"FB Page post failed: {e}")
+    # 2. Alfaz EUlfat Professional Profile - MAIN
+    if FB_PROFILE_ID and FB_USER_TOKEN:
+        try:
+            print(f"Posting to FB Professional Profile {FB_PROFILE_ID}")
+            post_to_fb_reel(video_url, FB_PROFILE_ID, FB_USER_TOKEN, caption)
+            post_to_fb_feed(feed_url, FB_PROFILE_ID, FB_USER_TOKEN, caption)
+            print("✅ Posted to Professional Profile too!")
+        except Exception as e:
+            print(f"Professional Profile post failed: {e}")
+
 if __name__ == "__main__":
     START_DATE = date(2026, 7, 5)
     today_day = (date.today() - START_DATE).days + 1
@@ -206,9 +226,7 @@ if __name__ == "__main__":
         try:
             post_to_insta_reel(reel_url_hd, caption)
             post_to_story(reel_url_story, IG_USER_ID, ACCESS_TOKEN)
-            if PAGE_ID:
-                post_to_fb_reel(reel_url_hd, PAGE_ID, ACCESS_TOKEN, caption)
-                post_to_fb_feed(public_url, PAGE_ID, ACCESS_TOKEN, caption)
+            post_to_both_fb(reel_url_hd, public_url, caption)
             post_to_threads(public_url, caption)
         except Exception as e:
             print(f"Extra post failed: {e}")
