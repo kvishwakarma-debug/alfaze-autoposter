@@ -1,7 +1,6 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# FIX for Pillow 10+
 from PIL import Image
 if not hasattr(Image, 'ANTIALIAS'):
     Image.ANTIALIAS = Image.LANCZOS
@@ -51,7 +50,7 @@ BG_PROMPTS = {
 27: "Indian train window chai kulhad on sill moving blur landscape",
 28: "beach sunset chai on sand waves kulhad",
 29: "college canteen steel table kulhad chai students blurred behind",
-30: "winter bonfire night hands holding kulhad chai near fire sparks",
+30: "winter bonfire night hands holding kulhad chai near fire sparks, cinematic, 8k",
 31: "morning terrace chai with newspaper kulhad steam sunrise"
 }
 HASHTAGS = {
@@ -60,112 +59,83 @@ HASHTAGS = {
 
 def create_chai_post(text, day_num):
     prompt = BG_PROMPTS.get(day_num, "kulhad chai cinematic")
-    encoded = urllib.parse.quote(prompt + ", photorealistic, warm cinematic, 4k")
-    bg_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1350&nologo=true&seed={day_num}"
-    print(f"Generating BG Day {day_num}")
-    r = requests.get(bg_url, timeout=90)
+    encoded = urllib.parse.quote(prompt + ", photorealistic, ultra hd, 8k, sharp focus, cinematic lighting")
+    # HD quality 1080x1920 direct
+    bg_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1920&nologo=true&seed={day_num}&enhance=true"
+    print(f"Generating HD BG Day {day_num}")
+    r = requests.get(bg_url, timeout=120)
     open("bg.jpg","wb").write(r.content)
-    img = Image.open("bg.jpg").convert("RGB").resize((1080,1350))
-    draw = ImageDraw.Draw(img, "RGBA")
+
+    # Original HD image
+    full_img = Image.open("bg.jpg").convert("RGB")
+    if full_img.size!= (1080,1920):
+        full_img = full_img.resize((1080,1920), Image.LANCZOS)
+
+    # 1. FEED IMAGE = 1080x1350 center crop from 1920
+    feed_img = full_img.crop((0, 285, 1080, 1635)) # center 1350 height
+    draw = ImageDraw.Draw(feed_img, "RGBA")
     try:
-        font_main = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf", 46)
-        font_wm = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf", 28)
+        font_main = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf", 52)
+        font_wm = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf", 30)
     except:
         font_main = ImageFont.load_default()
         font_wm = ImageFont.load_default()
+
     y = 500
     for line in text.split("\n"):
         bbox = draw.textbbox((0,0), line, font=font_main)
         x = (1080-(bbox[2]-bbox[0]))//2
-        draw.text((x,y), line, font=font_main, fill="white", stroke_width=4, stroke_fill="black")
-        y+=65
-    draw.text((35,1300), f"@alfaze.ulfat | Day {day_num}/365", font=font_wm, fill="white", stroke_width=2, stroke_fill="black")
+        # Better stroke
+        draw.text((x,y), line, font=font_main, fill="white", stroke_width=6, stroke_fill="black")
+        y+=70
+    draw.text((35,1280), f"@alfaze.ulfat | Day {day_num}/365", font=font_wm, fill="white", stroke_width=3, stroke_fill="black")
+
+    # 2. REEL/STORY IMAGE = Full 1080x1920 with same text but lower
+    reel_img = full_img.copy()
+    draw2 = ImageDraw.Draw(reel_img, "RGBA")
+    y2 = 750
+    for line in text.split("\n"):
+        bbox = draw2.textbbox((0,0), line, font=font_main)
+        x = (1080-(bbox[2]-bbox[0]))//2
+        draw2.text((x,y2), line, font=font_main, fill="white", stroke_width=6, stroke_fill="black")
+        y2+=70
+    draw2.text((35,1830), f"@alfaze.ulfat | Day {day_num}/365", font=font_wm, fill="white", stroke_width=3, stroke_fill="black")
+
     os.makedirs("public/images", exist_ok=True)
-    filename = f"day{day_num}_{int(datetime.now().timestamp())}.jpg"
-    filepath = f"public/images/{filename}"
-    img.save(filepath, "JPEG", quality=92)
+    ts = int(datetime.now().timestamp())
+    feed_path = f"public/images/day{day_num}_{ts}.jpg"
+    reel_img_path = f"public/images/day{day_num}_{ts}_reel.jpg"
+
+    feed_img.save(feed_path, "JPEG", quality=95, subsampling=0)
+    reel_img.save(reel_img_path, "JPEG", quality=95, subsampling=0)
+
     subprocess.run(["git","config","--global","user.name","Alfaze Bot"], check=True)
     subprocess.run(["git","config","--global","user.email","bot@alfaze.com"], check=True)
-    subprocess.run(["git","add",filepath], check=True)
-    subprocess.run(["git","commit","-m",f"Add Day {day_num}"], check=True)
+    subprocess.run(["git","add",feed_path, reel_img_path], check=True)
+    subprocess.run(["git","commit","-m",f"Add Day {day_num} HD"], check=True)
     subprocess.run(["git","push"], check=True)
-    time.sleep(12)
-    public_url = f"https://raw.githubusercontent.com/{REPO}/main/{filepath}"
-    return public_url, filepath
+    time.sleep(15)
+
+    feed_url = f"https://raw.githubusercontent.com/{REPO}/main/{feed_path}"
+    return feed_url, reel_img_path
 
 def image_to_reel_with_music(image_path, day_num):
     try:
         music_path = ensure_music()
         out = f"public/images/reel_day{day_num}_{int(datetime.now().timestamp())}.mp4"
-        print(f"Creating reel: {out}")
-        clip = ImageClip(image_path).set_duration(7).resize((1080,1920))
-
+        print(f"Creating HD reel: {out}")
+        # No resize! Already 1080x1920
+        clip = ImageClip(image_path).set_duration(7)
         if music_path and os.path.exists(music_path):
             try:
                 audio = AudioFileClip(music_path)
-                print(f"Audio duration: {audio.duration}")
-                if audio.duration < 2:
-                    print("Audio too short, silent reel")
-                    audio = None
-                else:
+                if audio.duration >= 2:
                     if audio.duration < 7:
                         from moviepy.audio.fx.all import audio_loop
                         audio = audio_loop(audio, duration=7)
                     else:
                         audio = audio.subclip(0,7)
-                    audio = audio.volumex(0.35)
+                    audio = audio.volumex(0.4)
                     clip = clip.set_audio(audio)
-                    print("✅ Music attached")
             except Exception as e:
-                print(f"Audio fail, silent: {e}")
-
-        clip.write_videofile(out, fps=24, codec='libx264', audio_codec='aac', logger=None)
-        subprocess.run(["git","add",out], check=True)
-        subprocess.run(["git","commit","-m",f"Add Reel {day_num}"], check=True)
-        subprocess.run(["git","push"], check=True)
-        time.sleep(12)
-        return f"https://raw.githubusercontent.com/{REPO}/main/{out}"
-    except Exception as e:
-        print(f"Reel create fail: {e}")
-        import traceback; traceback.print_exc()
-        return None
-
-def make_caption(shayari, day_num):
-    tag = HASHTAGS.get(day_num, "#ChaiShayari")
-    return f"{shayari}\n\n☕ Chai Aur Khayal - Day {day_num}/365\n\n#ChaiAurKhayal #AlfazeUlfat #Shayari {tag}"
-
-def post_to_instagram(image_url, caption):
-    r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media", data={"image_url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
-    print("Container:", r1)
-    if "id" not in r1: raise Exception(r1)
-    time.sleep(18)
-    r2 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media_publish", data={"creation_id": r1["id"], "access_token": ACCESS_TOKEN}).json()
-    print("Publish:", r2)
-    return r2
-
-if __name__ == "__main__":
-    START_DATE = date(2026, 7, 5)
-    today_day = (date.today() - START_DATE).days + 1
-    if today_day < 17: today_day = 17
-    if today_day > 31: today_day = random.choice(list(SHAYARIS.keys()))
-
-    existing = glob.glob(f"public/images/day{today_day}_*.jpg")
-    if existing and os.getenv("GITHUB_EVENT_NAME") == "schedule":
-        print(f"Day {today_day} already posted, skipping")
-        exit(0)
-
-    shayari = SHAYARIS.get(today_day, SHAYARIS[29])
-    print(f"Posting Day {today_day}")
-    public_url, local_path = create_chai_post(shayari, today_day)
-    caption = make_caption(shayari, today_day)
-    post_to_instagram(public_url, caption)
-
-    reel_url = image_to_reel_with_music(local_path, today_day)
-    if reel_url:
-        print("Reel URL:", reel_url)
-        if PAGE_ID:
-            try:
-                post_to_story(reel_url, IG_USER_ID, ACCESS_TOKEN)
-                post_to_fb_reel(reel_url, PAGE_ID, ACCESS_TOKEN, caption)
-            except Exception as e:
-                print("Story/FB failed:", e)
+                print(f"Audio fail: {e}")
