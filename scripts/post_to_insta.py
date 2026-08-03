@@ -1,7 +1,7 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# FIX for Pillow 10+ compatibility
+# FIX for Pillow 10+
 from PIL import Image
 if not hasattr(Image, 'ANTIALIAS'):
     Image.ANTIALIAS = Image.LANCZOS
@@ -99,13 +99,26 @@ def image_to_reel_with_music(image_path, day_num):
         out = f"public/images/reel_day{day_num}_{int(datetime.now().timestamp())}.mp4"
         print(f"Creating reel: {out}")
         clip = ImageClip(image_path).set_duration(7).resize((1080,1920))
+
         if music_path and os.path.exists(music_path):
             try:
-                audio = AudioFileClip(music_path).subclip(0,7).volumex(0.35)
-                clip = clip.set_audio(audio)
-                print("✅ Music attached")
+                audio = AudioFileClip(music_path)
+                print(f"Audio duration: {audio.duration}")
+                if audio.duration < 2:
+                    print("Audio too short, silent reel")
+                    audio = None
+                else:
+                    if audio.duration < 7:
+                        from moviepy.audio.fx.all import audio_loop
+                        audio = audio_loop(audio, duration=7)
+                    else:
+                        audio = audio.subclip(0,7)
+                    audio = audio.volumex(0.35)
+                    clip = clip.set_audio(audio)
+                    print("✅ Music attached")
             except Exception as e:
-                print(f"Audio fail, silent reel: {e}")
+                print(f"Audio fail, silent: {e}")
+
         clip.write_videofile(out, fps=24, codec='libx264', audio_codec='aac', logger=None)
         subprocess.run(["git","add",out], check=True)
         subprocess.run(["git","commit","-m",f"Add Reel {day_num}"], check=True)
@@ -114,6 +127,7 @@ def image_to_reel_with_music(image_path, day_num):
         return f"https://raw.githubusercontent.com/{REPO}/main/{out}"
     except Exception as e:
         print(f"Reel create fail: {e}")
+        import traceback; traceback.print_exc()
         return None
 
 def make_caption(shayari, day_num):
@@ -135,7 +149,6 @@ if __name__ == "__main__":
     if today_day < 17: today_day = 17
     if today_day > 31: today_day = random.choice(list(SHAYARIS.keys()))
 
-    # Duplicate check for scheduled runs
     existing = glob.glob(f"public/images/day{today_day}_*.jpg")
     if existing and os.getenv("GITHUB_EVENT_NAME") == "schedule":
         print(f"Day {today_day} already posted, skipping")
