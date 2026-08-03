@@ -1,6 +1,11 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# FIX for Pillow 10+ compatibility
+from PIL import Image
+if not hasattr(Image, 'ANTIALIAS'):
+    Image.ANTIALIAS = Image.LANCZOS
+
 from publishers.music_mixer import ensure_music
 from publishers.story_publisher import post_to_story
 from publishers.facebook_publisher import post_to_fb_reel
