@@ -5,7 +5,7 @@ from publishers.music_mixer import ensure_music
 from publishers.story_publisher import post_to_story
 from publishers.facebook_publisher import post_to_fb_reel
 
-import requests, random, time, subprocess, urllib.parse
+import requests, random, time, subprocess, urllib.parse, glob
 from PIL import Image, ImageDraw, ImageFont
 from datetime import date, datetime
 from moviepy.editor import ImageClip, AudioFileClip
@@ -50,27 +50,14 @@ BG_PROMPTS = {
 31: "morning terrace chai with newspaper kulhad steam sunrise"
 }
 HASHTAGS = {
-17: "#SubahKiChai #Yaadein #MorningChai",
-18: "#BaarishAurChai #ChaiLove #MonsoonVibes",
-19: "#Sehra #ChaiSiNami #ZindagiShayari",
-20: "#Kitabein #Khayal #ChaiAurKitaab",
-21: "#ChhatParChai #Subah #Sukoon",
-22: "#JungleVibes #ChaiKiGarmi #ForestSoul",
-23: "#JheelKinare #LakeVibes #Peaceful",
-24: "#WorkAndChai #OfficeChai #Sukoon",
-25: "#GaonKiSubah #ChulheKiChai #DesiVibes",
-26: "#GhatKiChai #Banaras #Zindagi",
-27: "#TrainJourney #WindowSeat #ChaiSafar",
-28: "#Samundar #BeachChai #Lehrein",
-29: "#CanteenChai #Dosti #CollegeDays",
-30: "#Alaav #BonfireNights #WinterChai",
-31: "#PehliChai #MorningThoughts #ChaiAurKhayal"
+17: "#SubahKiChai",18: "#BaarishAurChai",19: "#Sehra",20: "#Kitabein",21: "#ChhatParChai",22: "#JungleVibes",23: "#JheelKinare",24: "#WorkAndChai",25: "#GaonKiSubah",26: "#GhatKiChai",27: "#TrainJourney",28: "#Samundar",29: "#CanteenChai",30: "#Alaav",31: "#PehliChai"
 }
 
 def create_chai_post(text, day_num):
-    prompt = BG_PROMPTS.get(day_num, "kulhad chai cinematic warm light")
+    prompt = BG_PROMPTS.get(day_num, "kulhad chai cinematic")
     encoded = urllib.parse.quote(prompt + ", photorealistic, warm cinematic, 4k")
     bg_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1350&nologo=true&seed={day_num}"
+    print(f"Generating BG Day {day_num}")
     r = requests.get(bg_url, timeout=90)
     open("bg.jpg","wb").write(r.content)
     img = Image.open("bg.jpg").convert("RGB").resize((1080,1350))
@@ -97,10 +84,11 @@ def create_chai_post(text, day_num):
     subprocess.run(["git","add",filepath], check=True)
     subprocess.run(["git","commit","-m",f"Add Day {day_num}"], check=True)
     subprocess.run(["git","push"], check=True)
-    time.sleep(10)
-    return f"https://raw.githubusercontent.com/{REPO}/main/{filepath}", filepath
+    time.sleep(12)
+    public_url = f"https://raw.githubusercontent.com/{REPO}/main/{filepath}"
+    return public_url, filepath
 
-def image_to_reel(image_path, day_num):
+def image_to_reel_with_music(image_path, day_num):
     try:
         music_path = ensure_music()
         out = f"public/images/reel_day{day_num}_{int(datetime.now().timestamp())}.mp4"
@@ -111,10 +99,10 @@ def image_to_reel(image_path, day_num):
         subprocess.run(["git","add",out], check=True)
         subprocess.run(["git","commit","-m",f"Add Reel {day_num}"], check=True)
         subprocess.run(["git","push"], check=True)
-        time.sleep(10)
+        time.sleep(12)
         return f"https://raw.githubusercontent.com/{REPO}/main/{out}"
     except Exception as e:
-        print("Reel creation failed:", e)
+        print("Reel create fail:", e)
         return None
 
 def make_caption(shayari, day_num):
@@ -135,9 +123,26 @@ if __name__ == "__main__":
     today_day = (date.today() - START_DATE).days + 1
     if today_day < 17: today_day = 17
     if today_day > 31: today_day = random.choice(list(SHAYARIS.keys()))
+
+    # DUPLICATE CHECK - Agar aaj ka Day image already push hai to skip
+    existing = glob.glob(f"public/images/day{today_day}_*.jpg") + glob.glob(f"public/images/day{today_day}*.jpg")
+    if existing and os.getenv("GITHUB_EVENT_NAME") == "schedule":
+        print(f"Day {today_day} already exists, skipping scheduled run")
+        exit(0)
+
     shayari = SHAYARIS.get(today_day, SHAYARIS[29])
     print(f"Posting Day {today_day}")
     public_url, local_path = create_chai_post(shayari, today_day)
     caption = make_caption(shayari, today_day)
     post_to_instagram(public_url, caption)
-    # Try Reel/Story/FB
+
+    # Reel + Story + FB
+    reel_url = image_to_reel_with_music(local_path, today_day)
+    if reel_url:
+        print("Reel URL:", reel_url)
+        if PAGE_ID:
+            try:
+                post_to_story(reel_url, IG_USER_ID, ACCESS_TOKEN)
+                post_to_fb_reel(reel_url, PAGE_ID, ACCESS_TOKEN, caption)
+            except Exception as e:
+                print("Story/FB failed:", e)
