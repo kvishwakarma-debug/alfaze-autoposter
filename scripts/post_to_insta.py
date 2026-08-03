@@ -19,8 +19,6 @@ IG_USER_ID = os.getenv("IG_USER_ID")
 ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
 PAGE_ID = os.getenv("PAGE_ID")
 REPO = os.getenv("GITHUB_REPOSITORY")
-FB_PROFILE_ID = os.getenv("FB_PROFILE_ID")
-FB_USER_TOKEN = os.getenv("FB_USER_TOKEN")
 
 SHAYARIS = {
 17: "सुबह की चाय में तेरी यादों का धुआँ है,\nहर घूँट के साथ तू और याद आता है।",
@@ -183,26 +181,14 @@ def post_to_insta_reel(video_url, caption):
     return r2
 
 def post_to_both_fb(video_url, feed_url, caption):
-    print(f"DEBUG - PAGE_ID exists: {bool(PAGE_ID)}")
-    print(f"DEBUG - FB_PROFILE_ID exists: {bool(FB_PROFILE_ID)} -> {FB_PROFILE_ID}")
-    print(f"DEBUG - FB_USER_TOKEN exists: {bool(FB_USER_TOKEN)} -> Token length {len(FB_USER_TOKEN) if FB_USER_TOKEN else 0}")
     if PAGE_ID:
         try:
             print(f"Posting to FB Page {PAGE_ID}")
             post_to_fb_reel(video_url, PAGE_ID, ACCESS_TOKEN, caption)
             post_to_fb_feed(feed_url, PAGE_ID, ACCESS_TOKEN, caption)
+            print("✅ Posted to FB Page!")
         except Exception as e:
             print(f"FB Page post failed: {e}")
-    if FB_PROFILE_ID and FB_USER_TOKEN:
-        try:
-            print(f"Posting to FB Professional Profile {FB_PROFILE_ID}")
-            post_to_fb_reel(video_url, FB_PROFILE_ID, FB_USER_TOKEN, caption)
-            post_to_fb_feed(feed_url, FB_PROFILE_ID, FB_USER_TOKEN, caption)
-            print("✅ Posted to Professional Profile too!")
-        except Exception as e:
-            print(f"Professional Profile post failed: {e}")
-    else:
-        print(f"❌ SKIPPING Professional Profile - Missing ID or Token!")
 
 if __name__ == "__main__":
     START_DATE = date(2026, 7, 5)
@@ -217,7 +203,7 @@ if __name__ == "__main__":
         print(f"Day {today_day} already posted, skipping")
         exit(0)
     if existing:
-        print(f"Day {today_day} already exists but manual run - continuing for testing")
+        print(f"Day {today_day} already exists but manual run - continuing")
     shayari = SHAYARIS.get(today_day, SHAYARIS[30])
     print(f"Posting Day {today_day}")
     public_url, reel_local_path = create_chai_post(shayari, today_day)
