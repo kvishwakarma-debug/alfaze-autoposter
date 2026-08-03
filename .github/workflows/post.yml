@@ -36,6 +36,8 @@ jobs:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           PAGE_ACCESS_TOKEN: ${{ secrets.PAGE_ACCESS_TOKEN }}
           PAGE_ID: ${{ secrets.PAGE_ID }}
+          FB_PROFILE_ID: ${{ secrets.FB_PROFILE_ID }}
+          FB_USER_TOKEN: ${{ secrets.FB_USER_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           python scripts/post_to_insta.py
