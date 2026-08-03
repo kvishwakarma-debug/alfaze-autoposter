@@ -185,6 +185,10 @@ def post_to_insta_reel(video_url, caption):
     return r2
 
 def post_to_both_fb(video_url, feed_url, caption):
+    print(f"DEBUG - PAGE_ID exists: {bool(PAGE_ID)}")
+    print(f"DEBUG - FB_PROFILE_ID exists: {bool(FB_PROFILE_ID)} -> {FB_PROFILE_ID}")
+    print(f"DEBUG - FB_USER_TOKEN exists: {bool(FB_USER_TOKEN)} -> {FB_USER_TOKEN[:20] if FB_USER_TOKEN else 'EMPTY'}...")
+    
     # 1. Alfaz.e.Ulfat Page
     if PAGE_ID:
         try:
@@ -193,6 +197,7 @@ def post_to_both_fb(video_url, feed_url, caption):
             post_to_fb_feed(feed_url, PAGE_ID, ACCESS_TOKEN, caption)
         except Exception as e:
             print(f"FB Page post failed: {e}")
+    
     # 2. Alfaz EUlfat Professional Profile - MAIN
     if FB_PROFILE_ID and FB_USER_TOKEN:
         try:
@@ -202,6 +207,8 @@ def post_to_both_fb(video_url, feed_url, caption):
             print("✅ Posted to Professional Profile too!")
         except Exception as e:
             print(f"Professional Profile post failed: {e}")
+    else:
+        print(f"❌ SKIPPING Professional Profile - Missing ID or Token! ID={FB_PROFILE_ID}, Token exists={bool(FB_USER_TOKEN)}")
 
 if __name__ == "__main__":
     START_DATE = date(2026, 7, 5)
