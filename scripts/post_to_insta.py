@@ -3,12 +3,18 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from PIL import Image
 if not hasattr(Image, 'ANTIALIAS'):
     Image.ANTIALIAS = Image.LANCZOS
+
 from publishers.youtube_music import ensure_music_for_shayari
 from publishers.story_publisher import post_to_story
 from publishers.facebook_publisher import post_to_fb_reel
 import requests, time, subprocess, urllib.parse, datetime
 from PIL import Image, ImageDraw, ImageFont
-from moviepy.editor import ImageClip, AudioFileClip
+
+# FIX FOR MOVIEPY 2.x and 1.x BOTH
+try:
+    from moviepy.editor import ImageClip, AudioFileClip
+except ModuleNotFoundError:
+    from moviepy import ImageClip, AudioFileClip
 
 IG_USER_ID = os.getenv("IG_USER_ID")
 ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
@@ -33,7 +39,7 @@ def get_next_day_and_shayari():
             if d > max_day:
                 max_day = d
     if max_day == 0:
-        next_day = SHAYARI_LIST[0].get('id', 17)
+        next_day = SHAYARI_LIST[0].get('id', 32)
     else:
         next_day = max_day + 1
     print(f"Last Day: {max_day}, Next Day: {next_day}")
@@ -104,8 +110,7 @@ def image_to_reel_with_music(image_path, day_num, shayari_data):
                 try:
                     audio = AudioFileClip(music_path)
                     if audio.duration < 7:
-                        from moviepy.audio.fx.all import audio_loop
-                        audio = audio_loop(audio, duration=7)
+                        audio = audio.set_duration(7)
                     else:
                         start = random.uniform(0, max(0, audio.duration-7))
                         audio = audio.subclip(start, start+7)
