@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "text": "सुबह की चाय में तेरी यादों का धुआँ है,\nहर घूँट के साथ तू और याद आता है।",
+    "bg_prompt": "early morning balcony chai sunrise, steaming kulhad chai",
+    "hashtag": "#SubahKiChai"
+  },
+  {
+    "id": 2,
+    "text": "बारिश, चाय और तुम्हारी बातें,\nतीनों का नशा उतरता ही नहीं है।",
+    "bg_prompt": "rainy window chai monsoon, kulhad chai on windowsill with raindrops",
+    "hashtag": "#BaarishAurChai"
+  },
+  {
+    "id": 3,
+    "text": "सुबह की पहली चाय, और तुम्हारा पहला ख़याल,\nदिन की शुरुआत इससे बेहतर क्या होगी।",
+    "bg_prompt": "morning terrace chai with newspaper kulhad steam sunrise",
+    "hashtag": "#PehliChai"
+  }
+]
