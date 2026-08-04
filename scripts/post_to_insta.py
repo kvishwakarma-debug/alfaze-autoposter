@@ -123,8 +123,11 @@ def image_to_reel_with_music(image_path, day_num):
         return None, None
 
 def make_caption(shayari_data, day_num):
-    return f"{shayari_data['text']}\n\nChai Aur Khayal - Day {day_num}/365\n\n#ChaiAurKhayal #AlfazeUlfat #Shayari {shayari_data['hashtag']} #reels #reelsinstagram"
-
+    
+    def make_caption(shayari_data, day_num):
+    tags = shayari_data.get('hashtags') or shayari_data.get('hashtag', '')
+    return f"{shayari_data['text']}\n\nChai Aur Khayal - Day {day_num}/365\n\n{tags}\n\n#reels #reelsinstagram"
+    
 def post_to_instagram(image_url, caption):
     r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media", data={"image_url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
     print("Feed Container:", r1)
