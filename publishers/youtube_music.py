@@ -10,7 +10,6 @@ YT_LINKS = {
         "https://www.youtube.com/watch?v=1ox7W2rXQ0E",
         "https://www.youtube.com/watch?v=RBumgq5yVrA",
         "https://www.youtube.com/watch?v=2b9aB4sM6xQ",
-        "https://www.youtube.com/watch?v=Q5i4tR8u6yI",
     ],
     "romantic": [
         "https://www.youtube.com/watch?v=9mDzmvH0B4U",
@@ -20,7 +19,6 @@ YT_LINKS = {
     "peaceful": [
         "https://www.youtube.com/watch?v=lTRiuFIWV54",
         "https://www.youtube.com/watch?v=jfKfPfyJRdk",
-        "https://www.youtube.com/watch?v=5yx6BWlEVcY",
     ],
     "lofi": [
         "https://www.youtube.com/watch?v=jfKfPfyJRdk",
@@ -32,7 +30,7 @@ def get_mood(text):
     t = text.lower()
     if any(w in t for w in ["dard","gham","barbaad","tanhai","कमी","थकान","ग़म"]):
         return "sad"
-    if any(w in t for w in ["ishq","mohabbat","labon","aankhein","इश्क़"]):
+    if any(w in t for w in ["ishq","mohabbat","labon","aankhein"]):
         return "romantic"
     if any(w in t for w in ["sukoon","dua","सुकून"]):
         return "peaceful"
@@ -71,36 +69,27 @@ def ensure_music_for_shayari(shayari_data):
     MUSIC_DIR.mkdir(parents=True, exist_ok=True)
     for k in YT_LINKS:
         (MUSIC_DIR / k).mkdir(parents=True, exist_ok=True)
-
     mood = get_mood(shayari_data.get("text",""))
-    print(f"MOOD DETECTED: {mood}")
-
+    print(f"MOOD: {mood}")
     used = load_used()
     folder = MUSIC_DIR / mood
-
-    # Har baar naya download
     urls = YT_LINKS.get(mood, YT_LINKS["lofi"])
     random.shuffle(urls)
-
     for url in urls:
         fname = f"{mood}_{random.randint(10000,99999)}.mp3"
         out = folder / fname
-        print(f"Downloading from YT: {url} -> {fname}")
+        print(f"Downloading YT: {url} -> {fname}")
         if download_yt(url, out):
             mp3s = sorted(folder.glob("*.mp3"), key=lambda x: x.stat().st_mtime, reverse=True)
             if mp3s:
                 chosen = mp3s[0]
-                print(f"Downloaded OK: {chosen}")
+                print(f"Downloaded: {chosen}")
                 used.append(chosen.name)
                 save_used(used)
                 return str(chosen)
-
-    # Fallback
     all_mp3 = list(MUSIC_DIR.rglob("*.mp3"))
     if all_mp3:
         chosen = random.choice(all_mp3)
-        print(f"Fallback local: {chosen}")
+        print(f"Fallback: {chosen}")
         return str(chosen)
-
-    print("No music found at all!")
     return None
