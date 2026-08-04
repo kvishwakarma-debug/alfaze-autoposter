@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, json
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from PIL import Image
@@ -20,49 +20,26 @@ ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
 PAGE_ID = os.getenv("PAGE_ID")
 REPO = os.getenv("GITHUB_REPOSITORY")
 
-SHAYARIS = {
-17: "सुबह की चाय में तेरी यादों का धुआँ है,\nहर घूँट के साथ तू और याद आता है।",
-18: "बारिश, चाय और तुम्हारी बातें,\nतीनों का नशा उतरता ही नहीं है।",
-19: "सहरा सी है ये ज़िन्दगी मेरी,\nएक तुम हो जो चाय सी नमी देते हो।",
-20: "किताबों के पन्ने पलटते-पलटते,\nएक ख़याल में तुम पलट आते हो।",
-21: "छत पर चाय, और ख़यालों में तुम,\nइससे बेहतर सुबह हो ही नहीं सकती।",
-22: "जंगल की ख़ामोशी, चाय की गर्मी,\nऔर दिल में बस तुम्हारी नर्मी।",
-23: "झील किनारे चाय, और ख़यालों में तुम,\nइससे ज़्यादा सुकून कहाँ मिलेगा यार।",
-24: "काम के बोझ में भी सुकून है,\nजब चाय के बहाने तुम याद आते हो।",
-25: "गाँव की सुबह, चूल्हे की चाय,\nऔर तुम्हारी यादों की मीठी सी गहराई।",
-26: "घाट किनारे चाय, और ज़िन्दगी का ख़याल,\nहर घूँट में छुपा है एक सवाल।",
-27: "चलती ट्रेन, खिड़की पर चाय,\nऔर तुम्हारी याद का सफ़र जारी है।",
-28: "समुंदर किनारे चाय, और लहरों में तुम,\nइस दिल को और क्या चाहिए, बस तुम।",
-29: "कैंटीन की चाय में दोस्ती का ज़ायका है,\nऔर उसी ज़ायके में तुम्हारी कमी का एहसास है।",
-30: "अलाव की आँच, हाथों में चाय,\nऔर ख़यालों में बस तेरी ही परछाई।",
-31: "सुबह की पहली चाय, और तुम्हारा पहला ख़याल,\nदिन की शुरुआत इससे बेहतर क्या होगी।"
-}
-BG_PROMPTS = {
-17: "early morning balcony chai sunrise, steaming kulhad chai",
-18: "rainy window chai monsoon, kulhad chai on windowsill with raindrops",
-19: "desert sunset chai, kulhad on sand dune dramatic sky",
-20: "old books stack with kulhad chai on wooden table warm light",
-21: "rooftop chai sunrise city view, kulhad on ledge",
-22: "misty forest morning chai on wooden stump jungle background",
-23: "peaceful lake side chai on rock water reflection morning",
-24: "office desk laptop kulhad chai work from home cozy",
-25: "village chulha morning kulhad chai on mud stove village",
-26: "Varanasi ganga ghat morning chai on stone steps",
-27: "Indian train window chai kulhad on sill moving blur landscape",
-28: "beach sunset chai on sand waves kulhad",
-29: "college canteen steel table kulhad chai students blurred behind",
-30: "winter bonfire night hands holding kulhad chai near fire sparks, cinematic, 8k",
-31: "morning terrace chai with newspaper kulhad steam sunrise"
-}
-HASHTAGS = {
-17: "#SubahKiChai",18: "#BaarishAurChai",19: "#Sehra",20: "#Kitabein",21: "#ChhatParChai",22: "#JungleVibes",23: "#JheelKinare",24: "#WorkAndChai",25: "#GaonKiSubah",26: "#GhatKiChai",27: "#TrainJourney",28: "#Samundar",29: "#CanteenChai",30: "#Alaav",31: "#PehliChai"
-}
+def load_shayaris():
+    json_path = os.path.join(os.path.dirname(__file__), "shayari_data.json")
+    with open(json_path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-def create_chai_post(text, day_num):
-    prompt = BG_PROMPTS.get(day_num, "kulhad chai cinematic")
+SHAYARI_LIST = load_shayaris()
+
+def get_shayari_for_today():
+    START_DATE = date(2026, 7, 5)
+    days_passed = (date.today() - START_DATE).days
+    index = days_passed % len(SHAYARI_LIST)
+    data = SHAYARI_LIST[index]
+    return data, index + 1
+
+def create_chai_post(shayari_data, day_num):
+    text = shayari_data["text"]
+    prompt = shayari_data["bg_prompt"]
     encoded = urllib.parse.quote(prompt + ", photorealistic, ultra hd, 8k, sharp focus, cinematic lighting")
     bg_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1920&nologo=true&seed={day_num}&enhance=true"
-    print(f"Generating HD BG Day {day_num}")
+    print(f"Generating HD BG Day {day_num}: {prompt}")
     r = requests.get(bg_url, timeout=120)
     open("bg.jpg","wb").write(r.content)
     full_img = Image.open("bg.jpg").convert("RGB")
@@ -96,8 +73,8 @@ def create_chai_post(text, day_num):
     ts = int(datetime.now().timestamp())
     feed_path = f"public/images/day{day_num}_{ts}.jpg"
     reel_img_path = f"public/images/day{day_num}_{ts}_reel.jpg"
-    feed_img.save(feed_path, "JPEG", quality=95, subsampling=0)
-    reel_img.save(reel_img_path, "JPEG", quality=95, subsampling=0)
+    feed_img.save(feed_path, "JPEG", quality=90, subsampling=0)
+    reel_img.save(reel_img_path, "JPEG", quality=90, subsampling=0)
     subprocess.run(["git","config","--global","user.name","Alfaze Bot"], check=True)
     subprocess.run(["git","config","--global","user.email","bot@alfaze.com"], check=True)
     subprocess.run(["git","add",feed_path, reel_img_path], check=True)
@@ -145,9 +122,8 @@ def image_to_reel_with_music(image_path, day_num):
         traceback.print_exc()
         return None, None
 
-def make_caption(shayari, day_num):
-    tag = HASHTAGS.get(day_num, "#ChaiShayari")
-    return f"{shayari}\n\nChai Aur Khayal - Day {day_num}/365\n\n#ChaiAurKhayal #AlfazeUlfat #Shayari {tag} #reels #reelsinstagram"
+def make_caption(shayari_data, day_num):
+    return f"{shayari_data['text']}\n\nChai Aur Khayal - Day {day_num}/365\n\n#ChaiAurKhayal #AlfazeUlfat #Shayari {shayari_data['hashtag']} #reels #reelsinstagram"
 
 def post_to_instagram(image_url, caption):
     r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media", data={"image_url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
@@ -161,12 +137,7 @@ def post_to_instagram(image_url, caption):
 
 def post_to_insta_reel(video_url, caption):
     print(f"Posting Insta REEL: {video_url}")
-    r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media", data={
-        "media_type": "REELS",
-        "video_url": video_url,
-        "caption": caption,
-        "access_token": ACCESS_TOKEN
-    }).json()
+    r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media", data={"media_type": "REELS","video_url": video_url,"caption": caption,"access_token": ACCESS_TOKEN}).json()
     print("Reel Container:", r1)
     if "id" not in r1:
         return r1
@@ -185,38 +156,30 @@ def post_to_both_fb(video_url, feed_url, caption):
         try:
             print(f"Posting to FB Page {PAGE_ID}")
             post_to_fb_reel(video_url, PAGE_ID, ACCESS_TOKEN, caption)
-            post_to_fb_feed(feed_url, PAGE_ID, ACCESS_TOKEN, caption)
+            # post_to_fb_feed(feed_url, PAGE_ID, ACCESS_TOKEN, caption) # <-- FEED POST COMMENTED, ONLY REEL
             print("✅ Posted to FB Page!")
         except Exception as e:
             print(f"FB Page post failed: {e}")
 
 if __name__ == "__main__":
-    START_DATE = date(2026, 7, 5)
-    today_day = (date.today() - START_DATE).days + 1
-    if today_day < 17:
-        today_day = 17
-    if today_day > 31:
-        today_day = random.choice(list(SHAYARIS.keys()))
-    existing = glob.glob(f"public/images/day{today_day}_*.jpg")
+    shayari_data, day_num = get_shayari_for_today()
+    existing = glob.glob(f"public/images/day{day_num}_*.jpg")
     event_name = os.getenv("GITHUB_EVENT_NAME")
     if existing and event_name == "schedule":
-        print(f"Day {today_day} already posted, skipping")
+        print(f"Day {day_num} already posted, skipping")
         exit(0)
-    if existing:
-        print(f"Day {today_day} already exists but manual run - continuing")
-    shayari = SHAYARIS.get(today_day, SHAYARIS[30])
-    print(f"Posting Day {today_day}")
-    public_url, reel_local_path = create_chai_post(shayari, today_day)
-    caption = make_caption(shayari, today_day)
-    post_to_instagram(public_url, caption)
-    reel_url_hd, reel_url_story = image_to_reel_with_music(reel_local_path, today_day)
+    print(f"Posting Day {day_num}: {shayari_data['text'][:30]}...")
+    public_url, reel_local_path = create_chai_post(shayari_data, day_num)
+    caption = make_caption(shayari_data, day_num)
+
+    # --- FEED POST COMMENTED, ONLY REEL WILL GO ---
+    # post_to_instagram(public_url, caption)
+
+    reel_url_hd, reel_url_story = image_to_reel_with_music(reel_local_path, day_num)
     if reel_url_hd:
-        print(f"HD URL: {reel_url_hd}")
-        print(f"Story URL: {reel_url_story}")
         try:
             post_to_insta_reel(reel_url_hd, caption)
             post_to_story(reel_url_story, IG_USER_ID, ACCESS_TOKEN)
             post_to_both_fb(reel_url_hd, public_url, caption)
-            post_to_threads(public_url, caption)
         except Exception as e:
             print(f"Extra post failed: {e}")
