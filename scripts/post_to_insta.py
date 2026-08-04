@@ -1,4 +1,4 @@
-import sys, os, json, re, glob
+import sys, os, json, re, glob, textwrap
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from PIL import Image
@@ -9,7 +9,7 @@ from publishers.music_mixer import ensure_music
 from publishers.story_publisher import post_to_story
 from publishers.facebook_publisher import post_to_fb_reel
 
-import requests, time, subprocess, urllib.parse
+import requests, time, subprocess, urllib.parse, datetime
 from PIL import Image, ImageDraw, ImageFont
 from moviepy.editor import ImageClip, AudioFileClip
 
@@ -25,61 +25,90 @@ def load_shayaris():
 SHAYARI_LIST = load_shayaris()
 
 def get_next_day_and_shayari():
+    # JSON se sequence - public/images empty bhi ho to Day 17 se start
     existing = glob.glob("public/images/day*_*.jpg")
-    max_day = 16 # Last posted Day 16
+    existing += glob.glob("public/images/reel_day*_*.mp4")
+
+    max_day = 16 # Last Day 16 tha tumhara
     for f in existing:
         m = re.search(r'day(\d+)_', os.path.basename(f))
         if m:
             d = int(m.group(1))
             if d > max_day:
                 max_day = d
+
     next_day = max_day + 1
+    # Agar folder khali hai to Day 17
+    if not existing:
+        next_day = 17
+
+    print(f"Last found Day: {max_day}, Next Day: {next_day}")
+
     for item in SHAYARI_LIST:
         if item.get('id') == next_day:
             return item, next_day
+
+    # Fallback - JSON ke index se
     idx = (next_day - 17) % len(SHAYARI_LIST)
     return SHAYARI_LIST[idx], next_day
 
+def wrap_text_smart(text, width=32):
+    # Smart line break - dono side space ke saath
+    lines = []
+    for para in text.split("\n"):
+        wrapped = textwrap.wrap(para, width=width)
+        lines.extend(wrapped if wrapped else [""])
+    return lines
+
 def create_chai_post(shayari_data, day_num):
     text_for_image = shayari_data.get('text', '')
-    prompt = shayari_data.get("bg_prompt", "foggy railway station morning chai")
-    encoded = urllib.parse.quote(prompt + ", photorealistic, ultra hd, 8k, sharp focus, moody, foggy morning")
+    prompt = shayari_data.get("bg_prompt", "foggy railway station wooden bench kulhad chai misty morning cinematic")
+    encoded = urllib.parse.quote(prompt + ", photorealistic, ultra hd, 8k, sharp focus, moody, foggy morning, no text")
     bg_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1920&nologo=true&seed={day_num}&enhance=true"
+
     print(f"Generating BG Day {day_num}: {prompt}")
     r = requests.get(bg_url, timeout=120)
     open("bg.jpg","wb").write(r.content)
     full_img = Image.open("bg.jpg").convert("RGB").resize((1080,1920), Image.LANCZOS)
 
-    # Dark overlay like screenshot
-    overlay = Image.new("RGBA", (1080,1920), (0,0,0,0))
-    d = ImageDraw.Draw(overlay, "RGBA")
-    d.rectangle([0, 600, 1080, 1120], fill=(0,0,0,110))
-    full_img = Image.alpha_composite(full_img.convert("RGBA"), overlay).convert("RGB")
-
+    # NO BLACK BOX - Direct on image like your Day 16 screenshot
     draw = ImageDraw.Draw(full_img, "RGBA")
     try:
-        font_bold = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf", 44)
-        font_wm = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf", 26)
+        font_bold = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 42)
+        font_wm = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 26)
     except:
-        font_bold = ImageFont.load_default()
-        font_wm = font_bold
+        try:
+            font_bold = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf", 42)
+            font_wm = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf", 26)
+        except:
+            font_bold = ImageFont.load_default()
+            font_wm = font_bold
 
-    y = 700
-    for line in text_for_image.split("\n"):
+    # Text wrapping - side se 80px padding
+    wrapped_lines = wrap_text_smart(text_for_image, width=34)
+
+    # Center me calculate
+    total_text_height = len(wrapped_lines) * 62
+    y = (1920 - total_text_height) // 2 # Bilkul center
+
+    for line in wrapped_lines:
         bbox = draw.textbbox((0,0), line, font=font_bold)
         w = bbox[2]-bbox[0]
-        x = (1080-w)//2
-        draw.text((x,y), line, font=font_bold, fill="white", stroke_width=7, stroke_fill="black")
-        y+=60
+        x = (1080-w)//2 # Center X
 
-    draw.text((20, 1840), f"@alfaze.ulfat | Day {day_num}/365", font=font_wm, fill="white", stroke_width=3, stroke_fill="black")
+        # White text with thick black stroke - screenshot jaisa, no box
+        draw.text((x,y), line, font=font_bold, fill="white", stroke_width=6, stroke_fill="black")
+        y+=62
+
+    # Bottom left watermark - screenshot jaisa
+    draw.text((25, 1855), f"@alfaze.ulfat | Day {day_num}/365", font=font_wm, fill="white", stroke_width=3, stroke_fill="black")
 
     os.makedirs("public/images", exist_ok=True)
     ts = int(datetime.datetime.now().timestamp())
     feed_path = f"public/images/day{day_num}_{ts}.jpg"
     reel_img_path = f"public/images/day{day_num}_{ts}_reel.jpg"
-    full_img.save(feed_path, "JPEG", quality=92)
-    full_img.save(reel_img_path, "JPEG", quality=92)
+    full_img.save(feed_path, "JPEG", quality=95)
+    full_img.save(reel_img_path, "JPEG", quality=95)
 
     subprocess.run(["git","config","--global","user.name","Alfaze Bot"], check=True)
     subprocess.run(["git","config","--global","user.email","bot@alfaze.com"], check=True)
@@ -121,7 +150,7 @@ def image_to_reel_with_music(image_path, day_num):
 
 def make_caption(shayari_data, day_num):
     text = shayari_data.get('text', '')
-    tags = shayari_data.get('hashtags', '')
+    tags = shayari_data.get('hashtags', '#ChaiAurKhayal #AlfazeUlfat #Shayari')
     return f"{text}\n\n☕ Chai Aur Khayal - Day {day_num}/365\n\nChai ke saath thoda sukoon. Aapki aaj ki chai kaisi rahi? Comment me batao.\n\n.\n{tags} Day{day_num}of365 AlfazeUlfat SadLofi HindiShayari Reels"
 
 def post_to_insta_reel(video_url, caption):
@@ -137,13 +166,12 @@ def post_to_insta_reel(video_url, caption):
     return r2
 
 if __name__ == "__main__":
-    import datetime
     shayari_data, day_num = get_next_day_and_shayari()
     existing = glob.glob(f"public/images/day{day_num}_*.jpg")
     if existing and os.getenv("GITHUB_EVENT_NAME") == "schedule":
         print(f"Day {day_num} already posted")
         exit(0)
-    print(f"Posting Day {day_num}")
+    print(f"Posting Day {day_num}: {shayari_data['text'][:40]}")
     public_url, reel_local_path = create_chai_post(shayari_data, day_num)
     caption = make_caption(shayari_data, day_num)
     reel_url_hd, reel_url_story = image_to_reel_with_music(reel_local_path, day_num)
@@ -151,6 +179,7 @@ if __name__ == "__main__":
         post_to_insta_reel(reel_url_hd, caption)
         post_to_story(reel_url_story, IG_USER_ID, ACCESS_TOKEN)
         try:
+            from publishers.facebook_publisher import post_to_fb_reel
             post_to_fb_reel(reel_url_hd, PAGE_ID, ACCESS_TOKEN, caption)
         except Exception as e:
             print(e)
