@@ -3,14 +3,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from PIL import Image
 if not hasattr(Image, 'ANTIALIAS'):
     Image.ANTIALIAS = Image.LANCZOS
-
 from publishers.youtube_music import ensure_music_for_shayari
 from publishers.story_publisher import post_to_story
 from publishers.facebook_publisher import post_to_fb_reel
 import requests, time, subprocess, urllib.parse, datetime
 from PIL import Image, ImageDraw, ImageFont
-
-# FIX FOR MOVIEPY 2.x and 1.x BOTH
 try:
     from moviepy.editor import ImageClip, AudioFileClip
 except ModuleNotFoundError:
@@ -61,7 +58,7 @@ def create_chai_post(shayari_data, day_num):
     prompt = shayari_data.get("bg_prompt", "foggy railway station bench chai misty morning")
     encoded = urllib.parse.quote(prompt + ", photorealistic, 8k, moody, no text")
     bg_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1920&nologo=true&seed={day_num}&enhance=true"
-    print(f"BG Gen Day {day_num}: {prompt}")
+    print(f"BG Gen Day {day_num}")
     r = requests.get(bg_url, timeout=120)
     open("bg.jpg","wb").write(r.content)
     full_img = Image.open("bg.jpg").convert("RGB").resize((1080,1920), Image.LANCZOS)
@@ -106,7 +103,8 @@ def image_to_reel_with_music(image_path, day_num, shayari_data):
         out_story = f"public/images/story_day{day_num}_{ts}.mp4"
         def make_video(out_path, bitrate):
             clip = ImageClip(image_path).set_duration(7)
-            if music_path and os.path.exists(music_path):
+            audio_added = False
+            if music_path and os.path.exists(music_path) and os.path.getsize(music_path) > 1000:
                 try:
                     audio = AudioFileClip(music_path)
                     if audio.duration < 7:
@@ -116,9 +114,28 @@ def image_to_reel_with_music(image_path, day_num, shayari_data):
                         audio = audio.subclip(start, start+7)
                     audio = audio.volumex(0.35)
                     clip = clip.set_audio(audio)
+                    audio_added = True
+                    print(f"Audio mixed OK: {music_path}")
                 except Exception as e:
                     print(f"Audio mix error: {e}")
-            clip.write_videofile(out_path, fps=30, codec='libx264', audio_codec='aac', bitrate=bitrate, logger=None)
+            # IMPORTANT: If no audio, create with silent audio to avoid "No Sound" error
+            if not audio_added:
+                print("No audio added, creating video with silent audio track")
+                # Create silent audio with ffmpeg later, for now make video then add silent
+                clip.write_videofile(out_path, fps=30, codec='libx264', audio_codec='aac', bitrate=bitrate, logger=None)
+                # Add silent audio track using ffmpeg
+                try:
+                    temp_out = out_path + ".temp.mp4"
+                    os.rename(out_path, temp_out)
+                    cmd = ["ffmpeg", "-y", "-i", temp_out, "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-shortest", "-c:v", "copy", "-c:a", "aac", out_path]
+                    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    os.remove(temp_out)
+                    print("Added silent audio track")
+                except Exception as e:
+                    print(f"Silent audio add fail: {e}")
+                    os.rename(temp_out, out_path)
+            else:
+                clip.write_videofile(out_path, fps=30, codec='libx264', audio_codec='aac', bitrate=bitrate, logger=None)
             return out_path
         make_video(out_hd, "5000k")
         make_video(out_story, "1500k")
@@ -130,6 +147,8 @@ def image_to_reel_with_music(image_path, day_num, shayari_data):
         return base+out_hd, base+out_story
     except Exception as e:
         print(f"Reel fail: {e}")
+        import traceback
+        traceback.print_exc()
         return None, None
 
 def make_caption(shayari_data, day_num):
