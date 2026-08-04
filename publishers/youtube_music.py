@@ -1,44 +1,21 @@
 import os, json, random, requests
 from pathlib import Path
 
-MUSIC_DIR = Path("assets/music")
-USED_LOG = MUSIC_DIR / "used_tracks.json"
+MUSIC_DIR = Path("assets/music/sad")
+USED_LOG = Path("assets/music/used_tracks.json")
 
-# Pixabay No-Copyright Direct MP3 Links - Ye GitHub pe 100% download hota hai!
-PIXABAY_MUSIC = {
-    "sad": [
-        "https://cdn.pixabay.com/download/audio/2022/10/30/audio_fa7f9daf9f.mp3?filename=sad-piano-126813.mp3",
-        "https://cdn.pixabay.com/download/audio/2022/03/15/audio_4d9ed4d6d0.mp3?filename=sad-background-music-110373.mp3",
-        "https://cdn.pixabay.com/download/audio/2021/11/25/audio_10bd41749a.mp3?filename=sad-cinematic-piano-103396.mp3",
-        "https://cdn.pixabay.com/download/audio/2022/09/14/audio_619339fbc7.mp3?filename=sad-and-alone-122235.mp3",
-    ],
-    "romantic": [
-        "https://cdn.pixabay.com/download/audio/2022/06/07/audio_b9bd4170e8.mp3?filename=romantic-music-113514.mp3",
-        "https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=romantic-piano-100480.mp3",
-        "https://cdn.pixabay.com/download/audio/2022/02/07/audio_47bb1a4af0.mp3?filename=romantic-108859.mp3",
-    ],
-    "peaceful": [
-        "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3",
-        "https://cdn.pixabay.com/download/audio/2021/10/30/audio_f9bd4170e8.mp3?filename=lofi-hip-hop-101181.mp3",
-        "https://cdn.pixabay.com/download/audio/2022/10/30/audio_8ef37a484a.mp3?filename=lofi-chill-128252.mp3",
-    ],
-    "lofi": [
-        "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3",
-        "https://cdn.pixabay.com/download/audio/2022/06/07/audio_b9bd4170e8.mp3?filename=lofi-study-112191.mp3",
-        "https://cdn.pixabay.com/download/audio/2021/10/30/audio_f9bd4170e8.mp3?filename=lofi-hip-hop-101181.mp3",
-        "https://cdn.pixabay.com/download/audio/2022/03/24/audio_73d0e1d5f2.mp3?filename=lofi-background-music-112191.mp3",
-    ]
-}
-
-def get_mood(text):
-    t = text.lower()
-    if any(w in t for w in ["dard","gham","barbaad","tanhai","कमी","थकान","ग़म"]):
-        return "sad"
-    if any(w in t for w in ["ishq","mohabbat","labon","aankhein"]):
-        return "romantic"
-    if any(w in t for w in ["sukoon","dua","सुकून"]):
-        return "peaceful"
-    return "lofi"
+SAD_MUSIC = [
+    "https://cdn.pixabay.com/download/audio/2022/10/30/audio_fa7f9daf9f.mp3?filename=sad-piano-126813.mp3",
+    "https://cdn.pixabay.com/download/audio/2022/03/15/audio_4d9ed4d6d0.mp3?filename=sad-background-music-110373.mp3",
+    "https://cdn.pixabay.com/download/audio/2021/11/25/audio_10bd41749a.mp3?filename=sad-cinematic-piano-103396.mp3",
+    "https://cdn.pixabay.com/download/audio/2022/09/14/audio_619339fbc7.mp3?filename=sad-and-alone-122235.mp3",
+    "https://cdn.pixabay.com/download/audio/2022/08/02/audio_4d8b9b0e0a.mp3?filename=sad-piano-music-112199.mp3",
+    "https://cdn.pixabay.com/download/audio/2022/06/15/audio_ade8a7c3a9.mp3?filename=sad-piano-111427.mp3",
+    "https://cdn.pixabay.com/download/audio/2021/10/25/audio_5d2d9f9f0a.mp3?filename=sad-emotional-piano-101197.mp3",
+    "https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a6501d.mp3?filename=sad-violin-109368.mp3",
+    "https://cdn.pixabay.com/download/audio/2022/01/18/audio_6a2bb5f3cc.mp3?filename=sad-cello-108642.mp3",
+    "https://cdn.pixabay.com/download/audio/2021/09/01/audio_74a3b8a3d7.mp3?filename=sad-moment-100420.mp3",
+]
 
 def load_used():
     if USED_LOG.exists():
@@ -49,68 +26,55 @@ def load_used():
     return []
 
 def save_used(lst):
-    MUSIC_DIR.mkdir(parents=True, exist_ok=True)
+    MUSIC_DIR.parent.mkdir(parents=True, exist_ok=True)
     USED_LOG.write_text(json.dumps(lst, indent=2), encoding="utf-8")
 
-def download_pixabay(url, out_path):
+def download_music(url, out_path):
     try:
-        print(f"Downloading Pixabay music: {url}")
+        print(f"Downloading SAD: {url.split('/')[-1][:30]}")
         r = requests.get(url, timeout=60, stream=True)
         r.raise_for_status()
         with open(out_path, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
         if out_path.stat().st_size > 10000:
-            print(f"Downloaded OK: {out_path} size {out_path.stat().st_size}")
+            print(f"OK: {out_path.name} {out_path.stat().st_size} bytes")
             return True
-        else:
-            print(f"Downloaded file too small: {out_path}")
-            out_path.unlink(missing_ok=True)
-            return False
+        out_path.unlink(missing_ok=True)
+        return False
     except Exception as e:
-        print(f"Pixabay download fail: {e}")
+        print(f"Fail: {e}")
         return False
 
 def ensure_music_for_shayari(shayari_data):
     MUSIC_DIR.mkdir(parents=True, exist_ok=True)
-    for k in PIXABAY_MUSIC:
-        (MUSIC_DIR / k).mkdir(parents=True, exist_ok=True)
-
-    mood = get_mood(shayari_data.get("text",""))
-    print(f"MOOD DETECTED: {mood}")
-
     used = load_used()
-    folder = MUSIC_DIR / mood
+    print(f"Used tracks count: {len(used)}")
 
-    # 1. Pehle existing unused check
-    all_local = [p for p in folder.glob("*.mp3") if p.stat().st_size > 10000]
+    # Roz alag - unused local pehle
+    all_local = [p for p in MUSIC_DIR.glob("*.mp3") if p.stat().st_size > 10000]
     unused_local = [p for p in all_local if p.name not in used]
     if unused_local:
         chosen = random.choice(unused_local)
-        print(f"Using existing UNIQUE local: {chosen}")
+        print(f"Using UNIQUE sad: {chosen.name}")
         used.append(chosen.name)
         save_used(used)
         return str(chosen)
 
-    # 2. Naya download karo - har baar alag
-    urls = PIXABAY_MUSIC.get(mood, PIXABAY_MUSIC["lofi"])
-    random.shuffle(urls)
-    
-    for url in urls:
-        fname = f"{mood}_{random.randint(10000,99999)}.mp3"
-        out = folder / fname
-        if download_pixabay(url, out):
-            print(f"Downloaded NEW UNIQUE: {out}")
+    # Naya download
+    print("Downloading NEW sad track...")
+    for url in random.sample(SAD_MUSIC, len(SAD_MUSIC)):
+        fname = f"sad_{random.randint(10000,99999)}.mp3"
+        out = MUSIC_DIR / fname
+        if download_music(url, out):
             used.append(out.name)
+            if len(used) > 20:
+                used = [out.name]
             save_used(used)
             return str(out)
 
-    # 3. Kisi bhi mood se fallback
-    all_mp3 = [p for p in MUSIC_DIR.rglob("*.mp3") if p.stat().st_size > 10000]
+    all_mp3 = [p for p in MUSIC_DIR.glob("*.mp3") if p.stat().st_size > 10000]
     if all_mp3:
         chosen = random.choice(all_mp3)
-        print(f"Fallback any mood: {chosen}")
         return str(chosen)
-
-    print("No music found!")
     return None
