@@ -28,7 +28,6 @@ SHAYARI_LIST = load_shayaris()
 def get_next_day_and_shayari():
     existing = glob.glob("public/images/day*_*.jpg")
     existing += glob.glob("public/images/reel_day*_*.mp4")
-    
     max_day = 0
     for f in existing:
         m = re.search(r'day(\d+)_', os.path.basename(f))
@@ -98,13 +97,12 @@ def create_chai_post(shayari_data, day_num):
 def image_to_reel_with_music(image_path, day_num, shayari_data):
     try:
         music_path = ensure_music_for_shayari(shayari_data)
-        print(f"Music path: {music_path} exists: {os.path.exists(music_path) if music_path else False}")
+        print(f"Music path: {music_path}")
         ts = int(datetime.datetime.now().timestamp())
         out_hd = f"public/images/reel_day{day_num}_{ts}.mp4"
         out_story = f"public/images/story_day{day_num}_{ts}.mp4"
         def make_video(out_path, bitrate):
             clip = ImageClip(image_path).set_duration(7)
-            audio_added = False
             if music_path and os.path.exists(music_path) and os.path.getsize(music_path) > 1000:
                 try:
                     audio = AudioFileClip(music_path)
@@ -113,30 +111,12 @@ def image_to_reel_with_music(image_path, day_num, shayari_data):
                     else:
                         start = random.uniform(0, max(0, audio.duration-7))
                         audio = audio.subclip(start, start+7)
-                    audio = audio.volumex(0.85)
+                    audio = audio.volumex(0.55) # VOLUME KAM - SAD KE LIYE PERFECT
                     clip = clip.set_audio(audio)
-                    audio_added = True
-                    print(f"Audio mixed OK: {music_path}")
+                    print(f"Audio mixed vol 0.55: {music_path}")
                 except Exception as e:
                     print(f"Audio mix error: {e}")
-            # IMPORTANT: If no audio, create with silent audio to avoid "No Sound" error
-            if not audio_added:
-                print("No audio added, creating video with silent audio track")
-                # Create silent audio with ffmpeg later, for now make video then add silent
-                clip.write_videofile(out_path, fps=30, codec='libx264', audio_codec='aac', bitrate=bitrate, logger=None)
-                # Add silent audio track using ffmpeg
-                try:
-                    temp_out = out_path + ".temp.mp4"
-                    os.rename(out_path, temp_out)
-                    cmd = ["ffmpeg", "-y", "-i", temp_out, "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-shortest", "-c:v", "copy", "-c:a", "aac", out_path]
-                    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    os.remove(temp_out)
-                    print("Added silent audio track")
-                except Exception as e:
-                    print(f"Silent audio add fail: {e}")
-                    os.rename(temp_out, out_path)
-            else:
-                clip.write_videofile(out_path, fps=30, codec='libx264', audio_codec='aac', bitrate=bitrate, logger=None)
+            clip.write_videofile(out_path, fps=30, codec='libx264', audio_codec='aac', bitrate=bitrate, logger=None)
             return out_path
         make_video(out_hd, "5000k")
         make_video(out_story, "1500k")
@@ -148,8 +128,6 @@ def image_to_reel_with_music(image_path, day_num, shayari_data):
         return base+out_hd, base+out_story
     except Exception as e:
         print(f"Reel fail: {e}")
-        import traceback
-        traceback.print_exc()
         return None, None
 
 def make_caption(shayari_data, day_num):
