@@ -32,11 +32,11 @@ def get_shayari_for_today():
     days_passed = (date.today() - START_DATE).days
     index = days_passed % len(SHAYARI_LIST)
     data = SHAYARI_LIST[index]
-    return data, index + 1
+    return data, data.get('id', index + 1)
 
 def create_chai_post(shayari_data, day_num):
     text = shayari_data["text"]
-    prompt = shayari_data["bg_prompt"]
+    prompt = shayari_data.get("bg_prompt", "morning chai aesthetic")
     encoded = urllib.parse.quote(prompt + ", photorealistic, ultra hd, 8k, sharp focus, cinematic lighting")
     bg_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1920&nologo=true&seed={day_num}&enhance=true"
     print(f"Generating HD BG Day {day_num}: {prompt}")
@@ -123,11 +123,9 @@ def image_to_reel_with_music(image_path, day_num):
         return None, None
 
 def make_caption(shayari_data, day_num):
-    
-    def make_caption(shayari_data, day_num):
-    tags = shayari_data.get('hashtags') or shayari_data.get('hashtag', '')
+    tags = shayari_data.get('hashtags') or shayari_data.get('hashtag', '') or shayari_data.get('main_hashtag', '')
     return f"{shayari_data['text']}\n\nChai Aur Khayal - Day {day_num}/365\n\n{tags}\n\n#reels #reelsinstagram"
-    
+
 def post_to_instagram(image_url, caption):
     r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media", data={"image_url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
     print("Feed Container:", r1)
@@ -159,7 +157,6 @@ def post_to_both_fb(video_url, feed_url, caption):
         try:
             print(f"Posting to FB Page {PAGE_ID}")
             post_to_fb_reel(video_url, PAGE_ID, ACCESS_TOKEN, caption)
-            # post_to_fb_feed(feed_url, PAGE_ID, ACCESS_TOKEN, caption) # <-- FEED POST COMMENTED, ONLY REEL
             print("✅ Posted to FB Page!")
         except Exception as e:
             print(f"FB Page post failed: {e}")
@@ -174,10 +171,7 @@ if __name__ == "__main__":
     print(f"Posting Day {day_num}: {shayari_data['text'][:30]}...")
     public_url, reel_local_path = create_chai_post(shayari_data, day_num)
     caption = make_caption(shayari_data, day_num)
-
-    # --- FEED POST COMMENTED, ONLY REEL WILL GO ---
-    # post_to_instagram(public_url, caption)
-
+    # post_to_instagram(public_url, caption) # FEED POST COMMENTED - ONLY REEL
     reel_url_hd, reel_url_story = image_to_reel_with_music(reel_local_path, day_num)
     if reel_url_hd:
         try:
