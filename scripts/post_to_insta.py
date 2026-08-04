@@ -28,6 +28,7 @@ SHAYARI_LIST = load_shayaris()
 def get_next_day_and_shayari():
     existing = glob.glob("public/images/day*_*.jpg")
     existing += glob.glob("public/images/reel_day*_*.mp4")
+    
     max_day = 0
     for f in existing:
         m = re.search(r'day(\d+)_', os.path.basename(f))
@@ -112,7 +113,7 @@ def image_to_reel_with_music(image_path, day_num, shayari_data):
                     else:
                         start = random.uniform(0, max(0, audio.duration-7))
                         audio = audio.subclip(start, start+7)
-                    audio = audio.volumex(0.35)
+                    audio = audio.volumex(0.85)
                     clip = clip.set_audio(audio)
                     audio_added = True
                     print(f"Audio mixed OK: {music_path}")
