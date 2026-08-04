@@ -1,41 +1,25 @@
-name: Alfaze Daily Post
-
+name: Post Shayari
 on:
   schedule:
-    - cron: '30 1 * * *' # Roz 7:00 AM IST
+    - cron: '30 0 * * *'
   workflow_dispatch:
-
 jobs:
   post:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
-      - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-
-      - name: Install Fonts
+      - name: Install FFmpeg and deps
         run: |
-          sudo apt-get install -y fonts-noto-core fonts-noto-unhinted fonts-dejavu-core
-          sudo fc-cache -fv
-
-      - name: Install Python dependencies
-        run: |
-          pip install --upgrade pip
-          pip install requests pillow moviepy==1.0.3
-          pip install imageio-ffmpeg
-
-      - name: Run Chai Post Script
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          pip install yt-dlp moviepy Pillow requests
+      - name: Run bot
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           PAGE_ACCESS_TOKEN: ${{ secrets.PAGE_ACCESS_TOKEN }}
           PAGE_ID: ${{ secrets.PAGE_ID }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-        run: |
-          python scripts/post_to_insta.py
+        run: python scripts/post_to_insta.py
