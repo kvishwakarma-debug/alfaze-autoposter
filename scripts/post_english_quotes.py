@@ -1,4 +1,4 @@
-# scripts/post_english_quotes.py - English Quotes (1080x1080 Post) - FINAL DYNAMIC FIX
+# scripts/post_english_quotes.py - FINAL with Post + Story + FB Page
 import sys, os, json, re, glob, textwrap, random, time, requests, urllib.parse, datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from PIL import Image, ImageDraw, ImageFont
@@ -39,68 +39,47 @@ def wrap_text_smart(text, width=32):
     return lines
 
 def get_background_image(prompt, day_num):
-    # Dynamic sources - har baar alag image, same moody vibe
     encoded = urllib.parse.quote(prompt + ", photorealistic, cinematic, dark blue tones, lonely, no text, rainy cafe night")
-
     sources = [
         f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1080&nologo=true&seed={day_num+random.randint(1,99999)}",
         f"https://source.unsplash.com/1080x1080/?cafe,rain,night,moody,dark&sig={day_num+random.randint(1,99999)}",
         f"https://picsum.photos/seed/{day_num+random.randint(1,99999)}/1080/1080"
     ]
-
     for attempt, url in enumerate(sources):
         try:
-            print(f"Trying source {attempt+1}: {url[:90]}...")
+            print(f"Trying source {attempt+1}")
             r = requests.get(url, timeout=40, headers={'User-Agent': 'Mozilla/5.0'}, allow_redirects=True)
             if r.status_code == 200 and len(r.content) > 15000:
                 with open("bg_en.jpg","wb") as f:
                     f.write(r.content)
-                # Verify it's real image
                 try:
                     with Image.open("bg_en.jpg") as test:
                         test.verify()
                     img = Image.open("bg_en.jpg").convert("RGB")
-
-                    # For Unsplash/Picsum, add dark moody filter to match your perfect 2nd style
                     if attempt > 0:
                         overlay = Image.new("RGB", img.size, (18, 28, 48))
                         img = Image.blend(img, overlay, 0.35)
                         img = img.point(lambda p: int(p * 0.75))
-
-                    print(f"Success from source {attempt+1}")
                     return img
                 except:
                     continue
         except Exception as e:
             print(f"Source {attempt+1} failed: {e}")
             time.sleep(1)
-            continue
-
-    # Last resort: random dark bokeh (also random, not static)
-    print("All APIs failed, generating random moody bg")
+    # random fallback
     img = Image.new("RGB", (1080,1080), (12, 20, 35))
     draw = ImageDraw.Draw(img, "RGBA")
-    for _ in range(random.randint(18,28)):
+    for _ in range(22):
         x = random.randint(0,1080)
         y = random.randint(0,700)
         rad = random.randint(25,90)
         b = random.randint(50,160)
-        draw.ellipse([x-rad, y-rad, x+rad, y+rad], fill=(b, b//2, b//3, random.randint(30,90)))
-    for _ in range(400):
-        x1 = random.randint(0,1080)
-        y1 = random.randint(0,1080)
-        x2 = x1 + random.randint(-1,1)
-        y2 = y1 + random.randint(12,28)
-        draw.line([x1,y1,x2,y2], fill=(90,110,140, random.randint(20,60)), width=1)
+        draw.ellipse([x-rad, y-rad, x+rad, y+rad], fill=(b, b//2, b//3, 70))
     return img
 
 def create_quote_post(quote_data, day_num):
     prompt = quote_data.get('bg_prompt', 'dark rainy cafe interior at night, moody lonely aesthetic')
-    print(f"BG Gen Day {day_num}: {prompt}")
-
     full_img = get_background_image(prompt, day_num).resize((1080,1080), Image.LANCZOS)
-
-    # Tumhara perfect second wala gradient
     overlay = Image.new("RGBA", full_img.size, (0,0,0,0))
     d = ImageDraw.Draw(overlay)
     for y in range(1080):
@@ -109,18 +88,12 @@ def create_quote_post(quote_data, day_num):
             d.rectangle([0,y,1080,y+1], fill=(0,0,0,alpha))
     full_img = Image.alpha_composite(full_img.convert("RGBA"), overlay).convert("RGB")
     draw = ImageDraw.Draw(full_img)
-
     try:
         font_quote = ImageFont.truetype("/usr/share/fonts/liberation-serif/LiberationSerif-Italic.ttf", 42)
         font_wm = ImageFont.truetype("/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif.ttf", 19)
     except:
-        try:
-            font_quote = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf", 42)
-            font_wm = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 19)
-        except:
-            font_quote = ImageFont.load_default()
-            font_wm = ImageFont.load_default()
-
+        font_quote = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf", 42)
+        font_wm = ImageFont.load_default()
     wrapped_lines = wrap_text_smart(quote_data.get('text',''), width=32)[:4]
     y = 1080 - (len(wrapped_lines)*60) - 140
     for line in wrapped_lines:
@@ -129,11 +102,9 @@ def create_quote_post(quote_data, day_num):
         draw.text((x+2, y+2), line, font=font_quote, fill="black")
         draw.text((x, y), line, font=font_quote, fill="white")
         y+=60
-
     wm = "— @Alfaz-e-Ulfat"
     ww = draw.textbbox((0,0), wm, font=font_wm)[2]
     draw.text(((1080-ww)//2, 1035), wm, font=font_wm, fill=(230,230,230))
-
     os.makedirs("public/images", exist_ok=True)
     ts = int(datetime.datetime.now().timestamp())
     feed_path = f"public/images/en_day{day_num}_{ts}.jpg"
@@ -142,31 +113,59 @@ def create_quote_post(quote_data, day_num):
     return feed_path
 
 def make_caption(quote_data, day_num):
-    tags = quote_data.get('hashtags', '#DeepQuotes #AlfazeUlfat #EnglishQuotes #HealingQuotes')
+    tags = quote_data.get('hashtags', '#DeepQuotes #AlfazeUlfat #EnglishQuotes')
     return f"{quote_data.get('text','')}\n\n.\n.\n{tags}"
 
-def post_to_insta_image(image_url, caption):
+def post_to_insta_post(image_url, caption):
+    print("Posting to INSTA POST...")
     r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media",
                        data={"image_url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
-    print("Image Container:", r1)
+    print("Post Container:", r1)
     if "id" not in r1:
-        print(f"Failed to create container: {r1}")
         return r1
-    for i in range(15):
+    for _ in range(15):
         time.sleep(3)
         s = requests.get(f"https://graph.facebook.com/v20.0/{r1['id']}?fields=status_code&access_token={ACCESS_TOKEN}").json()
-        print(f"Status check {i}: {s}")
         if s.get("status_code") == "FINISHED" or "status_code" not in s:
             break
     r2 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media_publish",
                        data={"creation_id": r1["id"], "access_token": ACCESS_TOKEN}).json()
-    print("Publish:", r2)
+    print("Post Publish:", r2)
     return r2
+
+def post_to_insta_story(image_url):
+    print("Posting to INSTA STORY...")
+    try:
+        r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media",
+                           data={"image_url": image_url, "media_type": "STORIES", "access_token": ACCESS_TOKEN}).json()
+        print("Story Container:", r1)
+        if "id" not in r1:
+            return r1
+        time.sleep(5)
+        r2 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media_publish",
+                           data={"creation_id": r1["id"], "access_token": ACCESS_TOKEN}).json()
+        print("Story Publish:", r2)
+        return r2
+    except Exception as e:
+        print(f"Story failed: {e}")
+        return {"error": str(e)}
+
+def post_to_facebook_page(image_url, caption):
+    print("Posting to FB PAGE...")
+    try:
+        # FB page photo post
+        r = requests.post(f"https://graph.facebook.com/v20.0/{PAGE_ID}/photos",
+                          data={"url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
+        print("FB Page Publish:", r)
+        return r
+    except Exception as e:
+        print(f"FB Page failed: {e}")
+        return {"error": str(e)}
 
 if __name__ == "__main__":
     import subprocess
     quote_data, day_num = get_next_quote()
-    print(f"Posting English Day {day_num}: {quote_data.get('text')}")
+    print(f"Posting English Day {day_num}")
 
     local_path = create_quote_post(quote_data, day_num)
 
@@ -175,9 +174,17 @@ if __name__ == "__main__":
     subprocess.run(["git","add", local_path], check=True)
     subprocess.run(["git","commit","-m",f"Add English Quote Day {day_num}"], check=True)
     subprocess.run(["git","push"], check=True)
-    time.sleep(12)
+    time.sleep(15)
 
     base = f"https://raw.githubusercontent.com/{REPO}/main/"
     image_url = base + local_path
     caption = make_caption(quote_data, day_num)
-    post_to_insta_image(image_url, caption)
+
+    # 1. Insta Post
+    post_to_insta_post(image_url, caption)
+    time.sleep(5)
+    # 2. Insta Story
+    post_to_insta_story(image_url)
+    time.sleep(5)
+    # 3. FB Page
+    post_to_facebook_page(image_url, caption)
