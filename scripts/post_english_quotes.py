@@ -1,17 +1,13 @@
-# scripts/post_english_quotes.py - English Quotes (1080x1080 Post) - FINAL as per your folder structure
+# scripts/post_english_quotes.py - English Quotes (1080x1080 Post) - FIXED
 import sys, os, json, re, glob, textwrap, random, time, requests, urllib.parse, datetime
-# Tumhari existing structure ke hisab se path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from PIL import Image, ImageDraw, ImageFont
 
-# --- TOKEN PART (Same as your post_to_insta.py) ---
 IG_USER_ID = os.getenv("IG_USER_ID")
 ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
 PAGE_ID = os.getenv("PAGE_ID")
 REPO = os.getenv("GITHUB_REPOSITORY")
 
-# Path as per your screenshot: scripts/english_quotes_data.json
 def load_quotes():
     p = os.path.join(os.path.dirname(__file__), "english_quotes_data.json")
     with open(p, "r", encoding="utf-8") as f:
@@ -20,7 +16,6 @@ def load_quotes():
 QUOTES_LIST = load_quotes()
 
 def get_next_quote():
-    # Tumhari structure: public/images/ me save hoga
     existing = glob.glob("public/images/en_day*_*.jpg")
     max_day = 0
     for f in existing:
@@ -31,7 +26,6 @@ def get_next_quote():
                 max_day = d
     next_day = max_day + 1 if max_day > 0 else 1
     idx = (next_day - 1) % len(QUOTES_LIST)
-    # ID se match karo
     for item in QUOTES_LIST:
         if item.get('id') == next_day:
             return item, next_day
@@ -44,18 +38,53 @@ def wrap_text_smart(text, width=32):
         lines.extend(wrapped if wrapped else [""])
     return lines
 
+def get_background_image(prompt, day_num):
+    encoded = urllib.parse.quote(prompt + ", photorealistic, cinematic, dark blue tones, lonely, no text")
+    # Retry logic
+    for attempt in range(3):
+        try:
+            bg_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1080&nologo=true&seed={day_num+random.randint(1,99999)+attempt}"
+            print(f"Try {attempt+1}: {bg_url}")
+            r = requests.get(bg_url, timeout=60)
+            if r.status_code == 200 and len(r.content) > 10000:
+                # Check if it's actually an image
+                if r.headers.get('content-type','').startswith('image') or r.content[:4] == b'\xff\xd8\xff\xe0' or b'JFIF' in r.content[:20] or b'PNG' in r.content[:10]:
+                    open("bg_en.jpg","wb").write(r.content)
+                    # Test open
+                    test = Image.open("bg_en.jpg")
+                    test.verify()
+                    return Image.open("bg_en.jpg").convert("RGB")
+        except Exception as e:
+            print(f"BG attempt {attempt+1} failed: {e}")
+            time.sleep(2)
+
+    # FALLBACK: Agar image na aaye to khud se dark moody background banao (second wale jaisa)
+    print("Using fallback dark moody background")
+    img = Image.new("RGB", (1080,1080), (15, 25, 40))
+    draw = ImageDraw.Draw(img)
+    # Add some bokeh lights effect
+    for _ in range(20):
+        x = random.randint(0,1080)
+        y = random.randint(0,600)
+        r = random.randint(10,40)
+        brightness = random.randint(80,180)
+        draw.ellipse([x-r, y-r, x+r, y+r], fill=(brightness, brightness//2, brightness//4, 100))
+    # Add rain effect lines
+    for _ in range(300):
+        x1 = random.randint(0,1080)
+        y1 = random.randint(0,1080)
+        x2 = x1 + random.randint(-2,2)
+        y2 = y1 + random.randint(10,25)
+        draw.line([x1,y1,x2,y2], fill=(100,120,150,80), width=1)
+    return img
+
 def create_quote_post(quote_data, day_num):
-    # Perfect second wala background - moody rainy cafe
     prompt = quote_data.get('bg_prompt', 'dark rainy cafe interior at night, moody lonely aesthetic')
-    encoded = urllib.parse.quote(prompt + ", photorealistic, cinematic, dark blue tones, no text, lonely")
-    bg_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1080&nologo=true&seed={day_num+random.randint(1,99999)}"
     print(f"BG Gen Day {day_num}: {prompt}")
 
-    r = requests.get(bg_url, timeout=120)
-    open("bg_en.jpg","wb").write(r.content)
-    full_img = Image.open("bg_en.jpg").convert("RGB").resize((1080,1080), Image.LANCZOS)
+    full_img = get_background_image(prompt, day_num).resize((1080,1080), Image.LANCZOS)
 
-    # Second wala perfect gradient
+    # Perfect second wala gradient
     overlay = Image.new("RGBA", full_img.size, (0,0,0,0))
     d = ImageDraw.Draw(overlay)
     for y in range(1080):
@@ -69,8 +98,12 @@ def create_quote_post(quote_data, day_num):
         font_quote = ImageFont.truetype("/usr/share/fonts/liberation-serif/LiberationSerif-Italic.ttf", 42)
         font_wm = ImageFont.truetype("/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif.ttf", 19)
     except:
-        font_quote = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf", 42)
-        font_wm = ImageFont.load_default()
+        try:
+            font_quote = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf", 42)
+            font_wm = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 19)
+        except:
+            font_quote = ImageFont.load_default()
+            font_wm = ImageFont.load_default()
 
     wrapped_lines = wrap_text_smart(quote_data.get('text',''), width=32)[:4]
     y = 1080 - (len(wrapped_lines)*60) - 140
@@ -85,7 +118,6 @@ def create_quote_post(quote_data, day_num):
     ww = draw.textbbox((0,0), wm, font=font_wm)[2]
     draw.text(((1080-ww)//2, 1035), wm, font=font_wm, fill=(230,230,230))
 
-    # Tumhari directory ke hisab se: public/images/ me save
     os.makedirs("public/images", exist_ok=True)
     ts = int(datetime.datetime.now().timestamp())
     feed_path = f"public/images/en_day{day_num}_{ts}.jpg"
@@ -120,7 +152,6 @@ if __name__ == "__main__":
 
     local_path = create_quote_post(quote_data, day_num)
 
-    # Git push as per your post.yml logic
     subprocess.run(["git","config","--global","user.name","Alfaze Bot"], check=True)
     subprocess.run(["git","config","--global","user.email","bot@alfaze.com"], check=True)
     subprocess.run(["git","add", local_path], check=True)
