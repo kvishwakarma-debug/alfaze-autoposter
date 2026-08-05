@@ -1,4 +1,4 @@
-# scripts/post_english_quotes.py - English Quotes (1080x1080 Post) - FIXED
+# scripts/post_english_quotes.py - English Quotes (1080x1080 Post) - FINAL DYNAMIC FIX
 import sys, os, json, re, glob, textwrap, random, time, requests, urllib.parse, datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from PIL import Image, ImageDraw, ImageFont
@@ -39,43 +39,59 @@ def wrap_text_smart(text, width=32):
     return lines
 
 def get_background_image(prompt, day_num):
-    encoded = urllib.parse.quote(prompt + ", photorealistic, cinematic, dark blue tones, lonely, no text")
-    # Retry logic
-    for attempt in range(3):
-        try:
-            bg_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1080&nologo=true&seed={day_num+random.randint(1,99999)+attempt}"
-            print(f"Try {attempt+1}: {bg_url}")
-            r = requests.get(bg_url, timeout=60)
-            if r.status_code == 200 and len(r.content) > 10000:
-                # Check if it's actually an image
-                if r.headers.get('content-type','').startswith('image') or r.content[:4] == b'\xff\xd8\xff\xe0' or b'JFIF' in r.content[:20] or b'PNG' in r.content[:10]:
-                    open("bg_en.jpg","wb").write(r.content)
-                    # Test open
-                    test = Image.open("bg_en.jpg")
-                    test.verify()
-                    return Image.open("bg_en.jpg").convert("RGB")
-        except Exception as e:
-            print(f"BG attempt {attempt+1} failed: {e}")
-            time.sleep(2)
+    # Dynamic sources - har baar alag image, same moody vibe
+    encoded = urllib.parse.quote(prompt + ", photorealistic, cinematic, dark blue tones, lonely, no text, rainy cafe night")
 
-    # FALLBACK: Agar image na aaye to khud se dark moody background banao (second wale jaisa)
-    print("Using fallback dark moody background")
-    img = Image.new("RGB", (1080,1080), (15, 25, 40))
-    draw = ImageDraw.Draw(img)
-    # Add some bokeh lights effect
-    for _ in range(20):
+    sources = [
+        f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1080&nologo=true&seed={day_num+random.randint(1,99999)}",
+        f"https://source.unsplash.com/1080x1080/?cafe,rain,night,moody,dark&sig={day_num+random.randint(1,99999)}",
+        f"https://picsum.photos/seed/{day_num+random.randint(1,99999)}/1080/1080"
+    ]
+
+    for attempt, url in enumerate(sources):
+        try:
+            print(f"Trying source {attempt+1}: {url[:90]}...")
+            r = requests.get(url, timeout=40, headers={'User-Agent': 'Mozilla/5.0'}, allow_redirects=True)
+            if r.status_code == 200 and len(r.content) > 15000:
+                with open("bg_en.jpg","wb") as f:
+                    f.write(r.content)
+                # Verify it's real image
+                try:
+                    with Image.open("bg_en.jpg") as test:
+                        test.verify()
+                    img = Image.open("bg_en.jpg").convert("RGB")
+
+                    # For Unsplash/Picsum, add dark moody filter to match your perfect 2nd style
+                    if attempt > 0:
+                        overlay = Image.new("RGB", img.size, (18, 28, 48))
+                        img = Image.blend(img, overlay, 0.35)
+                        img = img.point(lambda p: int(p * 0.75))
+
+                    print(f"Success from source {attempt+1}")
+                    return img
+                except:
+                    continue
+        except Exception as e:
+            print(f"Source {attempt+1} failed: {e}")
+            time.sleep(1)
+            continue
+
+    # Last resort: random dark bokeh (also random, not static)
+    print("All APIs failed, generating random moody bg")
+    img = Image.new("RGB", (1080,1080), (12, 20, 35))
+    draw = ImageDraw.Draw(img, "RGBA")
+    for _ in range(random.randint(18,28)):
         x = random.randint(0,1080)
-        y = random.randint(0,600)
-        r = random.randint(10,40)
-        brightness = random.randint(80,180)
-        draw.ellipse([x-r, y-r, x+r, y+r], fill=(brightness, brightness//2, brightness//4, 100))
-    # Add rain effect lines
-    for _ in range(300):
+        y = random.randint(0,700)
+        rad = random.randint(25,90)
+        b = random.randint(50,160)
+        draw.ellipse([x-rad, y-rad, x+rad, y+rad], fill=(b, b//2, b//3, random.randint(30,90)))
+    for _ in range(400):
         x1 = random.randint(0,1080)
         y1 = random.randint(0,1080)
-        x2 = x1 + random.randint(-2,2)
-        y2 = y1 + random.randint(10,25)
-        draw.line([x1,y1,x2,y2], fill=(100,120,150,80), width=1)
+        x2 = x1 + random.randint(-1,1)
+        y2 = y1 + random.randint(12,28)
+        draw.line([x1,y1,x2,y2], fill=(90,110,140, random.randint(20,60)), width=1)
     return img
 
 def create_quote_post(quote_data, day_num):
@@ -84,7 +100,7 @@ def create_quote_post(quote_data, day_num):
 
     full_img = get_background_image(prompt, day_num).resize((1080,1080), Image.LANCZOS)
 
-    # Perfect second wala gradient
+    # Tumhara perfect second wala gradient
     overlay = Image.new("RGBA", full_img.size, (0,0,0,0))
     d = ImageDraw.Draw(overlay)
     for y in range(1080):
@@ -126,7 +142,7 @@ def create_quote_post(quote_data, day_num):
     return feed_path
 
 def make_caption(quote_data, day_num):
-    tags = quote_data.get('hashtags', '#DeepQuotes #AlfazeUlfat #EnglishQuotes')
+    tags = quote_data.get('hashtags', '#DeepQuotes #AlfazeUlfat #EnglishQuotes #HealingQuotes')
     return f"{quote_data.get('text','')}\n\n.\n.\n{tags}"
 
 def post_to_insta_image(image_url, caption):
@@ -134,10 +150,12 @@ def post_to_insta_image(image_url, caption):
                        data={"image_url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
     print("Image Container:", r1)
     if "id" not in r1:
+        print(f"Failed to create container: {r1}")
         return r1
-    for i in range(10):
+    for i in range(15):
         time.sleep(3)
         s = requests.get(f"https://graph.facebook.com/v20.0/{r1['id']}?fields=status_code&access_token={ACCESS_TOKEN}").json()
+        print(f"Status check {i}: {s}")
         if s.get("status_code") == "FINISHED" or "status_code" not in s:
             break
     r2 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media_publish",
@@ -148,7 +166,7 @@ def post_to_insta_image(image_url, caption):
 if __name__ == "__main__":
     import subprocess
     quote_data, day_num = get_next_quote()
-    print(f"Posting English Day {day_num}")
+    print(f"Posting English Day {day_num}: {quote_data.get('text')}")
 
     local_path = create_quote_post(quote_data, day_num)
 
