@@ -1,22 +1,56 @@
 name: Post Shayari
+
 on:
   schedule:
-    - cron: '30 0 * * *'
-  workflow_dispatch:
+    - cron: '30 0 * * *'  # 6:00 AM IST exact - Backup
+  workflow_dispatch:      # cron-job.org isi se trigger karega
+
+concurrency:
+  group: shayari-post-lock
+  cancel-in-progress: false
+
 jobs:
   post:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Double Post Protection Check
+        id: check
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+          echo "Today: $TODAY"
+          
+          # Check last post date from git history of public/images
+          LAST_DATE=$(git log -1 --format=%cd --date=short -- public/images/ 2>/dev/null || echo "none")
+          echo "Last posted date: $LAST_DATE"
+          
+          if [ "$TODAY" == "$LAST_DATE" ]; then
+            echo "❌ Aaj ka post already ho chuka hai! Skipping..."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Aaj ka post pending hai, posting..."
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Python
+        if: steps.check.outputs.skip == 'false'
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - name: Install deps
+
+      - name: Install dependencies
+        if: steps.check.outputs.skip == 'false'
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
           pip install requests Pillow moviepy==1.0.3 yt-dlp
-      - name: Run bot
+
+      - name: Run Autoposter Bot
+        if: steps.check.outputs.skip == 'false'
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           PAGE_ACCESS_TOKEN: ${{ secrets.PAGE_ACCESS_TOKEN }}
