@@ -1,4 +1,4 @@
-# scripts/post_english_quotes.py - FINAL with Post + Story + FB Page
+# scripts/post_english_quotes.py - FINAL - No Git Delay + Post + Story + FB
 import sys, os, json, re, glob, textwrap, random, time, requests, urllib.parse, datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from PIL import Image, ImageDraw, ImageFont
@@ -47,33 +47,24 @@ def get_background_image(prompt, day_num):
     ]
     for attempt, url in enumerate(sources):
         try:
-            print(f"Trying source {attempt+1}")
             r = requests.get(url, timeout=40, headers={'User-Agent': 'Mozilla/5.0'}, allow_redirects=True)
             if r.status_code == 200 and len(r.content) > 15000:
                 with open("bg_en.jpg","wb") as f:
                     f.write(r.content)
-                try:
-                    with Image.open("bg_en.jpg") as test:
-                        test.verify()
-                    img = Image.open("bg_en.jpg").convert("RGB")
-                    if attempt > 0:
-                        overlay = Image.new("RGB", img.size, (18, 28, 48))
-                        img = Image.blend(img, overlay, 0.35)
-                        img = img.point(lambda p: int(p * 0.75))
-                    return img
-                except:
-                    continue
-        except Exception as e:
-            print(f"Source {attempt+1} failed: {e}")
+                with Image.open("bg_en.jpg") as test:
+                    test.verify()
+                img = Image.open("bg_en.jpg").convert("RGB")
+                if attempt > 0:
+                    overlay = Image.new("RGB", img.size, (18, 28, 48))
+                    img = Image.blend(img, overlay, 0.35)
+                    img = img.point(lambda p: int(p * 0.75))
+                return img
+        except:
             time.sleep(1)
-    # random fallback
     img = Image.new("RGB", (1080,1080), (12, 20, 35))
     draw = ImageDraw.Draw(img, "RGBA")
     for _ in range(22):
-        x = random.randint(0,1080)
-        y = random.randint(0,700)
-        rad = random.randint(25,90)
-        b = random.randint(50,160)
+        x = random.randint(0,1080); y = random.randint(0,700); rad = random.randint(25,90); b = random.randint(50,160)
         draw.ellipse([x-rad, y-rad, x+rad, y+rad], fill=(b, b//2, b//3, 70))
     return img
 
@@ -112,79 +103,81 @@ def create_quote_post(quote_data, day_num):
     print(f"Saved to {feed_path}")
     return feed_path
 
+def upload_to_catbox(image_path):
+    print("Uploading to Catbox for instant URL...")
+    try:
+        with open(image_path, 'rb') as f:
+            r = requests.post("https://catbox.moe/user/api.php",
+                              data={"reqtype": "fileupload"},
+                              files={"fileToUpload": f}, timeout=30)
+            if r.status_code == 200 and "https://" in r.text:
+                url = r.text.strip()
+                print(f"Catbox URL: {url}")
+                return url
+    except Exception as e:
+        print(f"Catbox failed: {e}")
+    # Fallback to github raw
+    base = f"https://raw.githubusercontent.com/{REPO}/main/"
+    return base + image_path
+
 def make_caption(quote_data, day_num):
-    tags = quote_data.get('hashtags', '#DeepQuotes #AlfazeUlfat #EnglishQuotes')
+    tags = quote_data.get('hashtags', '#DeepQuotes #AlfazeUlfat #EnglishQuotes #HealingQuotes')
     return f"{quote_data.get('text','')}\n\n.\n.\n{tags}"
 
 def post_to_insta_post(image_url, caption):
-    print("Posting to INSTA POST...")
+    print("Posting INSTA POST...")
     r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media",
                        data={"image_url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
-    print("Post Container:", r1)
-    if "id" not in r1:
-        return r1
+    print(r1)
+    if "id" not in r1: return r1
     for _ in range(15):
         time.sleep(3)
         s = requests.get(f"https://graph.facebook.com/v20.0/{r1['id']}?fields=status_code&access_token={ACCESS_TOKEN}").json()
-        if s.get("status_code") == "FINISHED" or "status_code" not in s:
-            break
+        if s.get("status_code") == "FINISHED" or "status_code" not in s: break
     r2 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media_publish",
                        data={"creation_id": r1["id"], "access_token": ACCESS_TOKEN}).json()
-    print("Post Publish:", r2)
-    return r2
+    print(r2); return r2
 
 def post_to_insta_story(image_url):
-    print("Posting to INSTA STORY...")
+    print("Posting STORY...")
     try:
         r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media",
                            data={"image_url": image_url, "media_type": "STORIES", "access_token": ACCESS_TOKEN}).json()
-        print("Story Container:", r1)
-        if "id" not in r1:
-            return r1
+        print(r1)
+        if "id" not in r1: return r1
         time.sleep(5)
         r2 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media_publish",
                            data={"creation_id": r1["id"], "access_token": ACCESS_TOKEN}).json()
-        print("Story Publish:", r2)
-        return r2
+        print(r2); return r2
     except Exception as e:
-        print(f"Story failed: {e}")
-        return {"error": str(e)}
+        print(e); return {"error": str(e)}
 
 def post_to_facebook_page(image_url, caption):
-    print("Posting to FB PAGE...")
+    print("Posting FB PAGE...")
     try:
-        # FB page photo post
         r = requests.post(f"https://graph.facebook.com/v20.0/{PAGE_ID}/photos",
                           data={"url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
-        print("FB Page Publish:", r)
-        return r
+        print(r); return r
     except Exception as e:
-        print(f"FB Page failed: {e}")
-        return {"error": str(e)}
+        print(e); return {"error": str(e)}
 
 if __name__ == "__main__":
     import subprocess
     quote_data, day_num = get_next_quote()
-    print(f"Posting English Day {day_num}")
-
+    print(f"Posting English Day {day_num} at UTC {datetime.datetime.utcnow()}")
     local_path = create_quote_post(quote_data, day_num)
-
-    subprocess.run(["git","config","--global","user.name","Alfaze Bot"], check=True)
-    subprocess.run(["git","config","--global","user.email","bot@alfaze.com"], check=True)
-    subprocess.run(["git","add", local_path], check=True)
-    subprocess.run(["git","commit","-m",f"Add English Quote Day {day_num}"], check=True)
-    subprocess.run(["git","push"], check=True)
-    time.sleep(15)
-
-    base = f"https://raw.githubusercontent.com/{REPO}/main/"
-    image_url = base + local_path
+    image_url = upload_to_catbox(local_path)
     caption = make_caption(quote_data, day_num)
-
-    # 1. Insta Post
     post_to_insta_post(image_url, caption)
     time.sleep(5)
-    # 2. Insta Story
     post_to_insta_story(image_url)
     time.sleep(5)
-    # 3. FB Page
     post_to_facebook_page(image_url, caption)
+    try:
+        subprocess.run(["git","config","--global","user.name","Alfaze Bot"], check=True)
+        subprocess.run(["git","config","--global","user.email","bot@alfaze.com"], check=True)
+        subprocess.run(["git","add", local_path], check=True)
+        subprocess.run(["git","commit","-m",f"Add English Quote Day {day_num}"], check=True)
+        subprocess.run(["git","push"], check=True)
+    except Exception as e:
+        print(f"Git push failed but post done: {e}")
