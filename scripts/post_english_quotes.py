@@ -1,4 +1,4 @@
-# scripts/post_english_quotes.py - FINAL - No Git Delay + Post + Story + FB
+# scripts/post_english_quotes.py - FINAL - No Git Delay + 3 Platforms - FIXED UPLOADER
 import sys, os, json, re, glob, textwrap, random, time, requests, urllib.parse, datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from PIL import Image, ImageDraw, ImageFont
@@ -51,14 +51,17 @@ def get_background_image(prompt, day_num):
             if r.status_code == 200 and len(r.content) > 15000:
                 with open("bg_en.jpg","wb") as f:
                     f.write(r.content)
-                with Image.open("bg_en.jpg") as test:
-                    test.verify()
-                img = Image.open("bg_en.jpg").convert("RGB")
-                if attempt > 0:
-                    overlay = Image.new("RGB", img.size, (18, 28, 48))
-                    img = Image.blend(img, overlay, 0.35)
-                    img = img.point(lambda p: int(p * 0.75))
-                return img
+                try:
+                    with Image.open("bg_en.jpg") as test:
+                        test.verify()
+                    img = Image.open("bg_en.jpg").convert("RGB")
+                    if attempt > 0:
+                        overlay = Image.new("RGB", img.size, (18, 28, 48))
+                        img = Image.blend(img, overlay, 0.35)
+                        img = img.point(lambda p: int(p * 0.75))
+                    return img
+                except:
+                    continue
         except:
             time.sleep(1)
     img = Image.new("RGB", (1080,1080), (12, 20, 35))
@@ -104,19 +107,38 @@ def create_quote_post(quote_data, day_num):
     return feed_path
 
 def upload_to_catbox(image_path):
-    print("Uploading to Catbox for instant URL...")
+    print("Uploading for instant URL...")
+    # Try 1: Catbox
     try:
+        print("Trying Catbox...")
         with open(image_path, 'rb') as f:
             r = requests.post("https://catbox.moe/user/api.php",
                               data={"reqtype": "fileupload"},
                               files={"fileToUpload": f}, timeout=30)
+            print(f"Catbox response: {r.status_code} - {r.text[:200]}")
             if r.status_code == 200 and "https://" in r.text:
                 url = r.text.strip()
-                print(f"Catbox URL: {url}")
+                print(f"Catbox SUCCESS: {url}")
                 return url
     except Exception as e:
         print(f"Catbox failed: {e}")
-    # Fallback to github raw
+
+    # Try 2: 0x0.st - most reliable on GitHub
+    try:
+        print("Trying 0x0.st...")
+        with open(image_path, 'rb') as f:
+            r = requests.post("https://0x0.st", files={"file": f}, timeout=30)
+            print(f"0x0.st response: {r.status_code} - {r.text[:200]}")
+            if r.status_code == 200 and "https://" in r.text:
+                url = r.text.strip()
+                print(f"0x0.st SUCCESS: {url}")
+                return url
+    except Exception as e:
+        print(f"0x0.st failed: {e}")
+
+    # Fallback: GitHub raw with wait
+    print("All instant uploaders failed, using GitHub raw with 25 sec wait...")
+    time.sleep(25)
     base = f"https://raw.githubusercontent.com/{REPO}/main/"
     return base + image_path
 
@@ -125,39 +147,40 @@ def make_caption(quote_data, day_num):
     return f"{quote_data.get('text','')}\n\n.\n.\n{tags}"
 
 def post_to_insta_post(image_url, caption):
-    print("Posting INSTA POST...")
+    print(f"Posting INSTA POST with URL: {image_url}")
     r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media",
                        data={"image_url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
-    print(r1)
+    print(f"Post Container: {r1}")
     if "id" not in r1: return r1
     for _ in range(15):
         time.sleep(3)
         s = requests.get(f"https://graph.facebook.com/v20.0/{r1['id']}?fields=status_code&access_token={ACCESS_TOKEN}").json()
+        print(f"Post status: {s}")
         if s.get("status_code") == "FINISHED" or "status_code" not in s: break
     r2 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media_publish",
                        data={"creation_id": r1["id"], "access_token": ACCESS_TOKEN}).json()
-    print(r2); return r2
+    print(f"Post Publish: {r2}"); return r2
 
 def post_to_insta_story(image_url):
-    print("Posting STORY...")
+    print(f"Posting STORY with URL: {image_url}")
     try:
         r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media",
                            data={"image_url": image_url, "media_type": "STORIES", "access_token": ACCESS_TOKEN}).json()
-        print(r1)
+        print(f"Story Container: {r1}")
         if "id" not in r1: return r1
         time.sleep(5)
         r2 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media_publish",
                            data={"creation_id": r1["id"], "access_token": ACCESS_TOKEN}).json()
-        print(r2); return r2
+        print(f"Story Publish: {r2}"); return r2
     except Exception as e:
         print(e); return {"error": str(e)}
 
 def post_to_facebook_page(image_url, caption):
-    print("Posting FB PAGE...")
+    print(f"Posting FB PAGE with URL: {image_url}")
     try:
         r = requests.post(f"https://graph.facebook.com/v20.0/{PAGE_ID}/photos",
                           data={"url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
-        print(r); return r
+        print(f"FB Page Publish: {r}"); return r
     except Exception as e:
         print(e); return {"error": str(e)}
 
@@ -168,6 +191,7 @@ if __name__ == "__main__":
     local_path = create_quote_post(quote_data, day_num)
     image_url = upload_to_catbox(local_path)
     caption = make_caption(quote_data, day_num)
+    print(f"FINAL IMAGE URL FOR POSTING: {image_url}")
     post_to_insta_post(image_url, caption)
     time.sleep(5)
     post_to_insta_story(image_url)
