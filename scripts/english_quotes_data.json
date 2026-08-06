@@ -2,289 +2,601 @@
   {
     "id": 1,
     "text": "You became the person you needed when no one was there.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, dark blue tones, empty table, rain on glass",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #HealingQuotes #SelfLove #EnglishQuotes"
   },
   {
     "id": 2,
     "text": "You were healing, they thought you were moving on too fast.",
-    "bg_prompt": "person alone by rainy cafe window healing, empty chairs, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, introspective",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "person alone by rainy cafe window healing, empty chairs, dark rainy cafe night, introspective",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #HealingJourney #LettingGo #BreakupQuotes"
   },
   {
     "id": 3,
     "text": "They lost you while you were still trying not to lose them.",
-    "bg_prompt": "blurred person walking away outside rainy cafe window, empty table inside, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, loss",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "blurred person walking away outside rainy cafe window, empty table inside, loss",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #LostLove #MovingOn #RelatableQuotes"
   },
   {
     "id": 4,
     "text": "You are not hard to love, you were just loving the wrong people.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe interior at night, empty wooden table, rain on glass, city bokeh",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #SelfWorth #LoveQuotes #HealingQuotes"
   },
   {
     "id": 5,
     "text": "They only love the version of you that needs them.",
-    "bg_prompt": "two coffee cups on wooden table one untouched cold, rainy cafe night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, lost love",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "two coffee cups one untouched cold, rainy cafe night, lost love",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #ToxicLove #Realization #EnglishQuotes"
   },
   {
     "id": 6,
     "text": "You don't heal by going back. You heal by moving on.",
-    "bg_prompt": "person alone by rainy cafe window healing, empty chairs, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, introspective",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "person alone by rainy cafe window, dark blue tones, introspective",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #MovingOnQuotes #LifeLesson #Healing"
   },
   {
     "id": 7,
     "text": "You were the home they left, to find a house.",
-    "bg_prompt": "empty house window with cafe light, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, longing for home vibe",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "empty house window with cafe light, longing for home vibe, rainy night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #HomeQuotes #EmotionalQuotes #Breakup"
   },
   {
     "id": 8,
     "text": "You called it love, they called it convenience.",
-    "bg_prompt": "two coffee cups on wooden table one untouched cold, rainy cafe night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, lost love",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "two coffee cups on table one cold, dark rainy cafe, melancholic",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #OneSidedLove #RealityCheck #LoveHurts"
   },
   {
     "id": 9,
     "text": "You gave them your heart, they gave you lessons.",
-    "bg_prompt": "close up of empty cafe table with heart shaped steam from coffee, rainy night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "heart shaped steam from coffee, rainy night cafe, cinematic",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #LifeLessons #Heartbreak #Growth"
   },
   {
     "id": 10,
     "text": "You were there when no one was, and gone when you needed someone.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe interior, empty table, rain on glass, lonely",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #LoyaltyQuotes #SadQuotes #RealTalk"
   },
   {
     "id": 11,
     "text": "Stop begging for the love you give so freely.",
-    "bg_prompt": "two coffee cups on wooden table one untouched cold, rainy cafe night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, lost love",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "empty cafe table, cold coffee, night rain, introspective",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #SelfRespect #KnowYourWorth #QuotesDaily"
   },
   {
     "id": 12,
-    "text": "You died every day waiting for them to choose you.",
-    "bg_prompt": "empty chair opposite at cafe table, rainy window, waiting alone, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "text": "You broke a little every day waiting for them to choose you.",
+    "bg_prompt": "empty chair opposite at cafe table, waiting alone, rainy window",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #WaitingQuotes #SelfLoveJourney #Healing"
   },
   {
     "id": 13,
     "text": "Some people will never love you, no matter how much you love them.",
-    "bg_prompt": "two coffee cups on wooden table one untouched cold, rainy cafe night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, lost love",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "two cups one untouched, rainy cafe night, lost love aesthetic",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #HardTruth #Acceptance #LetGo"
   },
   {
     "id": 14,
-    "text": "You healed them, then they left you bleeding.",
-    "bg_prompt": "person alone by rainy cafe window healing, empty chairs, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, introspective",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "text": "You healed them, then they left you hurting.",
+    "bg_prompt": "person alone by window healing, empty chairs, dark blue",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #HealerQuotes #PainQuotes #EnglishQuotes"
   },
   {
     "id": 15,
     "text": "You were too real in a world that loves pretending.",
-    "bg_prompt": "two coffee cups on wooden table one untouched cold, rainy cafe night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, lost love",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, moody aesthetic, empty table, city bokeh",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #RealOnes #Authenticity #Relatable"
   },
   {
     "id": 16,
     "text": "They needed you until they didn't.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe interior, empty wooden table, melancholic",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #TruthHurts #UsedQuotes #MovingOn"
   },
   {
     "id": 17,
     "text": "You loved them more than you loved yourself. That's where it broke.",
-    "bg_prompt": "two coffee cups on wooden table one untouched cold, rainy cafe night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, lost love",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "two coffee cups cold, rainy night, lost love vibe",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #SelfLoveFirst #BreakupHealing #Lesson"
   },
   {
     "id": 18,
     "text": "You keep going back to the same pain with different faces.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, empty table, rain on glass, pattern",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #Patterns #GrowthQuotes #HealingJourney"
   },
   {
     "id": 19,
     "text": "You were an option to the person you made a priority.",
-    "bg_prompt": "empty chair opposite at cafe table, rainy window, waiting alone, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "empty chair opposite, rainy window, waiting alone",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #PriorityQuotes #OneSided #KnowYourValue"
   },
   {
     "id": 20,
     "text": "Your soft heart was never the problem. Their hard heart was.",
-    "bg_prompt": "close up of empty cafe table with heart shaped steam from coffee, rainy night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "heart steam coffee, rainy night, soft aesthetic",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #SoftHeart #EmpathQuotes #SelfWorth"
   },
   {
     "id": 21,
     "text": "You lost yourself trying to keep them.",
-    "bg_prompt": "blurred person walking away outside rainy cafe window, empty table inside, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, loss",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "blurred person walking away, empty cafe table, loss",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #LostSelf #FindingYourself #Healing"
   },
   {
     "id": 22,
     "text": "They left, and you had to become your own home again.",
-    "bg_prompt": "empty house window with cafe light, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, longing for home vibe",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "empty house window cafe light, longing, rainy night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #SelfHome #InnerPeace #Growth"
   },
   {
     "id": 23,
     "text": "You forgave them a thousand times, they couldn't forgive you once.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, empty table, melancholic cinematic",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #Forgiveness #DoubleStandards #Truth"
   },
   {
     "id": 24,
     "text": "You were the chapter they skipped, not the story they read.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark cafe, book on empty table, rainy night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #StoryQuotes #WorthQuotes #EnglishQuotes"
   },
   {
     "id": 25,
     "text": "You stayed loyal to a memory, not a person.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, empty table, rain glass, memory",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #MemoryQuotes #LettingGo #MovingForward"
   },
   {
     "id": 26,
     "text": "You taught them how to love, they practiced on someone else.",
-    "bg_prompt": "two coffee cups on wooden table one untouched cold, rainy cafe night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, lost love",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "two cups cold, rainy cafe night, lost love",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #BitterTruth #LoveLesson #BreakupQuotes"
   },
   {
     "id": 27,
     "text": "You are not what they left. You are what you became after.",
-    "bg_prompt": "blurred person walking away outside rainy cafe window, empty table inside, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, loss",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "person walking away outside, empty table inside, growth",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #ComebackQuotes #GrowthMindset #Stronger"
   },
   {
     "id": 28,
     "text": "You were begging for bare minimum from people who got your maximum.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, empty table, city bokeh, melancholic",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #MinimumMaximum #SelfRespect #WorthIt"
   },
   {
     "id": 29,
     "text": "You healed alone, because no one stayed to help you.",
-    "bg_prompt": "person alone by rainy cafe window healing, empty chairs, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, introspective",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "person alone by window, empty chairs, healing night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #AloneHealing #Independent #Resilience"
   },
   {
     "id": 30,
     "text": "You were their second choice, but you chose them first.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, empty table, rain, sad aesthetic",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #SecondChoice #FirstPriority #SadTruth"
   },
   {
     "id": 31,
     "text": "You kept the promises they forgot.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, empty table, promises, night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #PromiseQuotes #Loyalty #BrokenPromises"
   },
   {
     "id": 32,
     "text": "You were too busy loving them to notice they stopped loving you.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, empty table, rain, realization",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #Realization #LoveBlind #HealingQuotes"
   },
   {
     "id": 33,
     "text": "You are the reason you keep surviving your worst days.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, empty table, hope light, melancholic but warm",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #SurvivorQuotes #Motivation #SelfLove"
   },
   {
     "id": 34,
-    "text": "You let them break you because you thought love hurts.",
-    "bg_prompt": "two coffee cups on wooden table one untouched cold, rainy cafe night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, lost love",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "text": "You let them hurt you because you thought love hurts.",
+    "bg_prompt": "two cups cold, rainy cafe night, learning",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #LoveHurtsNot #LessonLearned #Growth"
   },
   {
     "id": 35,
     "text": "You were the cure for their loneliness, not their love.",
-    "bg_prompt": "two coffee cups on wooden table one untouched cold, rainy cafe night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, lost love",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "two cups cold, rainy cafe, lonely cure",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #Loneliness #TemporaryPeople #TruthBomb"
   },
   {
     "id": 36,
     "text": "You gave them closure, they left you with questions.",
-    "bg_prompt": "blurred person walking away outside rainy cafe window, empty table inside, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, loss",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "person walking away, empty table inside, questions",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #ClosureQuotes #Unanswered #MovingOn"
   },
   {
     "id": 37,
     "text": "You will never be too much for the right person.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, warm light on table, hopeful",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #RightPerson #EnoughQuotes #LoveWillCome"
   },
   {
     "id": 38,
     "text": "You loved them at their worst, they left you at your worst.",
-    "bg_prompt": "two coffee cups on wooden table one untouched cold, rainy cafe night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, lost love",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "two cups cold, rainy night, worst times",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #WorstTimes #LoyaltyTest #RealLove"
   },
   {
     "id": 39,
     "text": "You keep watering people who never bloomed for you.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark cafe, small plant on table, rain window",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #WateringQuotes #EnergyDrain #SelfCare"
   },
   {
     "id": 40,
     "text": "You were the lesson they needed, not the love they wanted.",
-    "bg_prompt": "two coffee cups on wooden table one untouched cold, rainy cafe night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, lost love",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "two cups cold, rainy cafe night, lesson",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #LessonNotLove #Purpose #Growth"
   },
   {
     "id": 41,
     "text": "You chose them, even when they didn't choose you.",
-    "bg_prompt": "empty chair opposite at cafe table, rainy window, waiting alone, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "empty chair opposite, rainy window, waiting",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #ChoiceQuotes #Unchosen #SelfWorth"
   },
   {
     "id": 42,
     "text": "You are still worthy, even after all that heartbreak.",
-    "bg_prompt": "close up of empty cafe table with heart shaped steam from coffee, rainy night, dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "heart steam coffee, rainy night, worthy, warm light",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #WorthyQuotes #HeartbreakHealing #YouMatter"
   },
   {
     "id": 43,
     "text": "You thought they were your forever, they thought you were for now.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, empty table, forever vs now",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #ForeverQuotes #Temporary #Reality"
   },
   {
     "id": 44,
     "text": "You stopped needing them, that's when they started noticing you.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, person looking out window, detached",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #Detachment #PowerQuotes #GlowUp"
   },
   {
     "id": 45,
     "text": "You were never difficult. You were just with difficult people.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, empty table, rain, clarity",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #NotDifficult #ToxicPeople #Clarity"
   },
   {
     "id": 46,
     "text": "You became cold because they were never warm.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, cold blue tones, empty table",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #ColdQuotes #Warmth #ChangedMe"
   },
   {
     "id": 47,
     "text": "You don't need to be fixed, you need to be felt.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, empty table, emotional, felt",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #FeltNotFixed #EmotionalDepth #LoveQuotes"
   },
   {
     "id": 48,
     "text": "One day you'll thank yourself for not giving up.",
-    "bg_prompt": "dark rainy cafe interior at night, moody lonely aesthetic, cinematic, photorealistic, dark blue tones, empty wooden table, rain on glass, city bokeh outside, melancholic",
-    "hashtags": "#DeepQuotes #AlfazeUlfat #HealingQuotes #BreakupQuotes #EnglishQuotes"
+    "bg_prompt": "dark rainy cafe, warm light breaking through rain, hope",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #DontGiveUp #FutureYou #MotivationDaily"
+  },
+  {
+    "id": 49,
+    "text": "You are healing, even on days you feel like you are breaking again.",
+    "bg_prompt": "person alone by rainy cafe window, soft warm light, healing",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #HealingIsNotLinear #KeepGoing #SelfCompassion"
+  },
+  {
+    "id": 50,
+    "text": "They walked away so easily, you are still learning how to stay with yourself.",
+    "bg_prompt": "empty chair, rainy window, learning to stay",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #StayWithYourself #InnerWork #LettingGo"
+  },
+  {
+    "id": 51,
+    "text": "You deserve the same love you keep giving to everyone else.",
+    "bg_prompt": "two cups, one for self, rainy cafe night, self love",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #DeserveLove #SelfLoveQuotes #Worthy"
+  },
+  {
+    "id": 52,
+    "text": "You are allowed to miss them and still not want them back.",
+    "bg_prompt": "dark rainy cafe, looking out window, missing but moving on",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #MissButNotWant #MixedFeelings #Healing"
+  },
+  {
+    "id": 53,
+    "text": "You are not behind in life. You are healing at your own pace.",
+    "bg_prompt": "dark cafe, clock on wall blurred, slow healing, rain",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #OwnPace #LifeQuotes #Patience"
+  },
+  {
+    "id": 54,
+    "text": "Some goodbyes don't need a conversation. Just distance.",
+    "bg_prompt": "blurred figure outside cafe, distance, rainy night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #GoodbyeQuotes #DistanceHeals #Peace"
+  },
+  {
+    "id": 55,
+    "text": "You kept your heart soft in a world that tried to harden you.",
+    "bg_prompt": "soft heart steam coffee, dark cafe, resilient",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #SoftHeartStrongSoul #Resilience #KindHeart"
+  },
+  {
+    "id": 56,
+    "text": "You are not lonely, you are just surrounded by temporary energy.",
+    "bg_prompt": "empty cafe with many empty chairs, temporary people",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #LonelyQuotes #TemporaryPeople #Energy"
+  },
+  {
+    "id": 57,
+    "text": "You stopped explaining yourself when you realized not everyone wants to understand.",
+    "bg_prompt": "person alone looking out, done explaining, peaceful",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #StopExplaining #InnerPeace #Growth"
+  },
+  {
+    "id": 58,
+    "text": "Your peace is more important than their opinion of you.",
+    "bg_prompt": "peaceful empty table, warm light, rain outside, calm",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #PeaceOverDrama #ProtectYourPeace #Mindset"
+  },
+  {
+    "id": 59,
+    "text": "You are learning to be okay with people not choosing you.",
+    "bg_prompt": "empty chair, acceptance, rainy cafe window",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #AcceptanceQuotes #NotChosen #SelfAcceptance"
+  },
+  {
+    "id": 60,
+    "text": "You don't have to be okay all the time to still be moving forward.",
+    "bg_prompt": "dark rainy cafe, forward movement, hope",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #NotOkayIsOkay #Progress #MentalHealth"
+  },
+  {
+    "id": 61,
+    "text": "They only noticed your absence when they needed your presence.",
+    "bg_prompt": "empty table where you used to sit, noticed absence",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #AbsenceQuotes #Realization #Value"
+  },
+  {
+    "id": 62,
+    "text": "You are rebuilding a life they thought you couldn't live without them.",
+    "bg_prompt": "rebuilding, cafe being cleaned morning after rain, new start",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #Rebuilding #NewLife #ComebackStronger"
+  },
+  {
+    "id": 63,
+    "text": "You are allowed to outgrow people who are not growing.",
+    "bg_prompt": "plant growing on cafe table, growth vs stuck, rainy night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #Outgrow #GrowthQuotes #LetGoToGrow"
+  },
+  {
+    "id": 64,
+    "text": "You don't miss them, you miss who you were when you were with them.",
+    "bg_prompt": "mirror reflection in rainy cafe window, missing self",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #MissYourself #Identity #SelfDiscovery"
+  },
+  {
+    "id": 65,
+    "text": "You are not hard to forget. They are just pretending you never existed.",
+    "bg_prompt": "empty table, pretending, dark blue cafe",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #HardToForget #Pretending #Truth"
+  },
+  {
+    "id": 66,
+    "text": "You are learning that closure comes from within, not from them.",
+    "bg_prompt": "person journaling alone in cafe, closure within, rain",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #ClosureWithin #InnerHealing #SelfHealing"
+  },
+  {
+    "id": 67,
+    "text": "You kept showing up for people who only showed up when it was convenient.",
+    "bg_prompt": "empty cafe at night, you alone waiting, convenience",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #ConvenientPeople #ShowUp #Reciprocity"
+  },
+  {
+    "id": 68,
+    "text": "You are not what happened to you. You are what you choose to become.",
+    "bg_prompt": "dark cafe with sunrise light starting, becoming",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #BecomeQuotes #PastDoesNotDefine #Rise"
+  },
+  {
+    "id": 69,
+    "text": "You are allowed to leave places that feel heavy on your heart.",
+    "bg_prompt": "person leaving cafe into rain, leaving heavy place",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #LeaveHeavyPlaces #ProtectEnergy #Boundaries"
+  },
+  {
+    "id": 70,
+    "text": "You are not too sensitive. You just felt things they were too numb to feel.",
+    "bg_prompt": "sensitive soul, rain on glass, feeling deeply, cafe",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #SensitiveSoul #Empath #DeepFeeler"
+  },
+  {
+    "id": 71,
+    "text": "You are still becoming. Don't rush the process.",
+    "bg_prompt": "coffee brewing slowly, process, dark rainy cafe, patience",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #StillBecoming #ProcessQuotes #TrustTheJourney"
+  },
+  {
+    "id": 72,
+    "text": "You don't need their apology to start your healing.",
+    "bg_prompt": "healing alone, no apology needed, rainy window",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #NoApologyNeeded #StartHealing #ForgiveForYou"
+  },
+  {
+    "id": 73,
+    "text": "You are allowed to love them from a distance.",
+    "bg_prompt": "distance love, looking out cafe window at far lights",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #LoveFromDistance #BoundariesInLove #MatureLove"
+  },
+  {
+    "id": 74,
+    "text": "You are not replaceable. You are unforgettable for the right heart.",
+    "bg_prompt": "unforgettable, empty table but warm light remains, memory",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #Unforgettable #Irreplaceable #RightHeart"
+  },
+  {
+    "id": 75,
+    "text": "You are learning to choose peace over proving a point.",
+    "bg_prompt": "peaceful coffee, no argument, calm cafe night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #ChoosePeace #Maturity #LetThemThink"
+  },
+  {
+    "id": 76,
+    "text": "You are not empty. You are just making space for something better.",
+    "bg_prompt": "empty cafe table making space, minimal, hopeful, rain",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #MakingSpace #BetterComing #HopeQuotes"
+  },
+  {
+    "id": 77,
+    "text": "You were giving 100% to people who were only giving 10%.",
+    "bg_prompt": "two cups one full one almost empty, effort imbalance",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #EffortQuotes #Imbalance #KnowYourWorth"
+  },
+  {
+    "id": 78,
+    "text": "You are allowed to be both healing and hurting at the same time.",
+    "bg_prompt": "person healing but eyes sad, both feelings, rainy cafe",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #BothFeelings #HealingJourney #ValidFeelings"
+  },
+  {
+    "id": 79,
+    "text": "You don't have to hate them to let them go.",
+    "bg_prompt": "letting go peacefully, no hate, calm rainy night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #LetGoWithoutHate #PeacefulClosure #Maturity"
+  },
+  {
+    "id": 80,
+    "text": "You are not weak for missing them. You are human for feeling.",
+    "bg_prompt": "human feeling, missing, soft rain cafe, empathy",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #HumanQuotes #ItsOkayToMiss #FeelingsMatter"
+  },
+  {
+    "id": 81,
+    "text": "You are learning that not everyone deserves access to your heart.",
+    "bg_prompt": "heart locked but soft, access, boundaries, cafe night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #AccessDenied #BoundariesMatter #ProtectHeart"
+  },
+  {
+    "id": 82,
+    "text": "You are becoming the kind of person who no longer chases.",
+    "bg_prompt": "person sitting calmly not chasing, peaceful, rain",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #StopChasing #Attract #SelfRespectEra"
+  },
+  {
+    "id": 83,
+    "text": "You are allowed to start over, even when it feels like you are starting from scratch.",
+    "bg_prompt": "new coffee being made, start over, morning after rain cafe",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #StartOver #FreshStart #NewBeginnings"
+  },
+  {
+    "id": 84,
+    "text": "You are not lost. You are in the middle of finding yourself again.",
+    "bg_prompt": "finding self, mirror in cafe window, middle of journey",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #FindingMyself #LostAndFound #Journey"
+  },
+  {
+    "id": 85,
+    "text": "You are not too late. Your story is still being written.",
+    "bg_prompt": "open journal on cafe table, story being written, rain outside, hope",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #NotTooLate #YourStory #KeepWriting"
+  },
+  {
+    "id": 86,
+    "text": "You are allowed to be proud of how far you have come, even if no one claps for you.",
+    "bg_prompt": "clap for yourself, alone but proud in cafe, night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #ProudOfYou #SelfCelebration #HowFarYouCame"
+  },
+  {
+    "id": 87,
+    "text": "You are not their second option. You are someone's first prayer.",
+    "bg_prompt": "prayer, warm light on empty table, hopeful romantic",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #FirstPrayer #DivineLove #YouAreLoved"
+  },
+  {
+    "id": 88,
+    "text": "You are learning that real love doesn't make you question your worth.",
+    "bg_prompt": "real love calm, no anxiety, peaceful cafe, worth",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #RealLoveQuotes #WorthQuotes #HealthyLove"
+  },
+  {
+    "id": 89,
+    "text": "You are not broken. You are just in between who you were and who you are becoming.",
+    "bg_prompt": "in between phase, transition, rainy cafe, becoming",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #NotBroken #Becoming #Transition"
+  },
+  {
+    "id": 90,
+    "text": "You are allowed to keep your heart open, even after it was hurt.",
+    "bg_prompt": "open heart despite hurt, brave, cafe warm light",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #OpenHeart #BraveHeart #LoveAgain"
+  },
+  {
+    "id": 91,
+    "text": "You are not too much and you are not too little. You were just too real for them.",
+    "bg_prompt": "too real, balanced, dark cafe, authentic",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #TooReal #EnoughAsYouAre #AuthenticSoul"
+  },
+  {
+    "id": 92,
+    "text": "You are learning to hold space for yourself the way you held it for everyone else.",
+    "bg_prompt": "holding space for self, alone but caring for self, cafe",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #HoldSpaceForYourself #SelfCare #InnerChild"
+  },
+  {
+    "id": 93,
+    "text": "You are not waiting for love. You are preparing for the love you deserve.",
+    "bg_prompt": "preparing for love, cleaning table, ready for new, rainy night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #PreparingForLove #DeserveBetter #LoveIsComing"
+  },
+  {
+    "id": 94,
+    "text": "You are allowed to walk away from anything that costs you your peace.",
+    "bg_prompt": "walking away from cafe, choosing peace, rain, freedom",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #WalkAwayForPeace #PeaceIsPriceless #Boundaries"
+  },
+  {
+    "id": 95,
+    "text": "You are not what they said about you in their anger.",
+    "bg_prompt": "words in rain washed away, not defined by anger, cafe window",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #NotWhatTheySaid #YouDefineYou #Truth"
+  },
+  {
+    "id": 96,
+    "text": "You are still here. That is your strength.",
+    "bg_prompt": "still here, resilience, empty cafe but you remain, strong",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #StillHere #StrengthQuotes #Resilience"
+  },
+  {
+    "id": 97,
+    "text": "You are learning that letting go is also a form of love.",
+    "bg_prompt": "letting go with love, peaceful release, rainy cafe night",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #LettingGoIsLove #HighestForm #Release"
+  },
+  {
+    "id": 98,
+    "text": "You are not invisible. The right eyes just haven't found you yet.",
+    "bg_prompt": "invisible but light searching, right eyes, cafe night, hope",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #NotInvisible #SeenSoon #RightEyes"
+  },
+  {
+    "id": 99,
+    "text": "You are allowed to grieve the person you were before the heartbreak.",
+    "bg_prompt": "grieving old self, reflection in window, rainy cafe",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #GrieveOldSelf #BeforeHeartbreak #HealingGrief"
+  },
+  {
+    "id": 100,
+    "text": "You are becoming the love you were always looking for.",
+    "bg_prompt": "becoming love itself, self love, warm light in dark cafe, full circle",
+    "hashtags": "#AlfazeUlfat #DeepQuotes #BecomingLove #SelfLoveEra #FinalQuote"
   }
 ]
