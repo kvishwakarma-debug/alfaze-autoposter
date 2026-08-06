@@ -1,7 +1,7 @@
 """
-Good Night Auto Poster - Alfaze Ulfat - FINAL WITH PUBLISHING
+Good Night Auto Poster - Alfaze Ulfat - FINAL
 Location: scripts/post_good_night.py
-JSON: scripts/good_night_shayari_with_backgrounds.json
+Uses: IG_USER_ID, PAGE_ACCESS_TOKEN, PAGE_ID (same as English Quotes)
 """
 
 import json, random, os, requests, time
@@ -22,21 +22,13 @@ FONT_CANDIDATES = [
     "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf",
 ]
 
-def get_env(*names):
-    for n in names:
-        v = os.environ.get(n)
-        if v:
-            print(f"Found env {n} -> {v[:10]}...")
-            return v
-    return None
-
 def get_font(size):
-    for path in FONT_CANDIDATES:
-        if os.path.exists(path):
+    for p in FONT_CANDIDATES:
+        if os.path.exists(p):
             try:
-                return ImageFont.truetype(path, size)
+                return ImageFont.truetype(p, size)
             except:
-                continue
+                pass
     return ImageFont.load_default()
 
 def get_random_entry():
@@ -115,38 +107,50 @@ def upload_to_uguu(p):
     return None
 
 def publish_to_instagram(image_url, caption):
-    token = get_env("ACCESS_TOKEN", "FB_ACCESS_TOKEN", "IG_ACCESS_TOKEN", "FACEBOOK_TOKEN", "TOKEN")
-    ig_user_id = get_env("IG_USER_ID", "INSTAGRAM_USER_ID", "IG_ID")
-    if not token or not ig_user_id:
-        print("Skipping IG: Token or IG User ID not set. Available envs:", [k for k in os.environ.keys() if 'TOKEN' in k or 'IG_' in k or 'ACCESS' in k])
+    # EXACT same env names as English Quotes workflow
+    token = os.environ.get("PAGE_ACCESS_TOKEN")
+    ig_user_id = os.environ.get("IG_USER_ID")
+    
+    print(f"DEBUG - IG_USER_ID exists: {bool(ig_user_id)} len: {len(ig_user_id) if ig_user_id else 0}")
+    print(f"DEBUG - PAGE_ACCESS_TOKEN exists: {bool(token)} len: {len(token) if token else 0}")
+    
+    if not token:
+        print("ERROR: PAGE_ACCESS_TOKEN is empty! Check GitHub Secrets")
         return False
+    if not ig_user_id:
+        print("ERROR: IG_USER_ID is empty!")
+        return False
+        
     print(f"Publishing to Instagram: {ig_user_id}")
     container_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media"
     payload = {"image_url": image_url, "caption": caption, "access_token": token}
     r = requests.post(container_url, data=payload, timeout=60)
-    print(f"IG Container: {r.status_code} - {r.text[:500]}")
+    print(f"IG Container: {r.status_code} - {r.text[:800]}")
     if r.status_code != 200:
         return False
     creation_id = r.json().get("id")
     if not creation_id:
         return False
-    time.sleep(12)
+    time.sleep(15)
     publish_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media_publish"
     r2 = requests.post(publish_url, data={"creation_id": creation_id, "access_token": token}, timeout=60)
-    print(f"IG Publish: {r2.status_code} - {r2.text[:500]}")
+    print(f"IG Publish: {r2.status_code} - {r2.text[:800]}")
     return r2.status_code == 200
 
 def publish_to_facebook(image_url, caption):
-    token = get_env("ACCESS_TOKEN", "FB_ACCESS_TOKEN", "FACEBOOK_TOKEN")
-    page_id = get_env("FB_PAGE_ID", "FACEBOOK_PAGE_ID", "PAGE_ID")
+    token = os.environ.get("PAGE_ACCESS_TOKEN")
+    page_id = os.environ.get("PAGE_ID")
+    
+    print(f"DEBUG - PAGE_ID exists: {bool(page_id)} len: {len(page_id) if page_id else 0}")
+    
     if not token or not page_id:
-        print("Skipping FB: Token or Page ID not set.")
+        print(f"Skipping FB: token={bool(token)} page_id={bool(page_id)}")
         return False
     print(f"Publishing to Facebook Page: {page_id}")
     fb_url = f"https://graph.facebook.com/v20.0/{page_id}/photos"
     payload = {"url": image_url, "caption": caption, "access_token": token}
     r = requests.post(fb_url, data=payload, timeout=60)
-    print(f"FB Publish: {r.status_code} - {r.text[:500]}")
+    print(f"FB Publish: {r.status_code} - {r.text[:800]}")
     return r.status_code == 200
 
 if __name__=="__main__":
@@ -164,4 +168,3 @@ if __name__=="__main__":
     ig_ok = publish_to_instagram(public_url, caption)
     fb_ok = publish_to_facebook(public_url, caption)
     print(f"\nResults: IG={'OK' if ig_ok else 'FAIL'} FB={'OK' if fb_ok else 'FAIL'}")
-    print(f"Done: {poster} -> {public_url}")
