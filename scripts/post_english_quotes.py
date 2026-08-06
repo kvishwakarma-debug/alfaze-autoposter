@@ -1,4 +1,3 @@
-@@ -1,4 +1,4 @@
 # scripts/post_english_quotes.py - FINAL - No Git Delay + 3 Platforms - FIXED UPLOADER
 # scripts/post_english_quotes.py - ULTIMATE FIX - Working Uploader + Correct Flow
 import sys, os, json, re, glob, textwrap, random, time, requests, urllib.parse, datetime
