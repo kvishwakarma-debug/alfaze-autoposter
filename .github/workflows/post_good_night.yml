@@ -1,9 +1,9 @@
 name: Post Good Night Shayari
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '30 16 * * *'  # 10:00 PM IST = 4:30 PM UTC = 16:30 UTC
+    - cron: '30 16 * * *'  # 10:00 PM IST
+  workflow_dispatch:
 
 jobs:
   post:
@@ -20,10 +20,9 @@ jobs:
       - name: Install dependencies
         run: |
           pip install Pillow requests
-          sudo apt-get update && sudo apt-get install -y fonts-dejavu-core fonts-liberation
-          sudo apt-get install -y fonts-noto-core fonts-noto-cjk || true
+          sudo apt-get update && sudo apt-get install -y fonts-dejavu-core fonts-liberation fonts-noto-core fonts-noto-cjk || true
 
-      - name: Run Good Night Poster
+      - name: Run Good Night Poster (Feed + Story + FB)
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           PAGE_ACCESS_TOKEN: ${{ secrets.PAGE_ACCESS_TOKEN }}
