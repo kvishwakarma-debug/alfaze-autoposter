@@ -1,8 +1,8 @@
 """
-Good Night Auto Poster - Alfaze Ulfat - FIXED TEXT CUT + FOOTER
+Good Night Auto Poster - Alfaze Ulfat - NO BOX VERSION + Story
 Location: scripts/post_good_night.py
 Uses: IG_USER_ID, PAGE_ACCESS_TOKEN, PAGE_ID
-Fix: Smaller Hindi font, more padding, English font for footer
+Fix: No transparent box, direct text on background with glow
 """
 
 import json, random, os, requests, time
@@ -17,7 +17,6 @@ OUTPUT_IMAGE = os.path.join(OUTPUT_DIR, "good_night.jpg")
 
 FOOTER_TEXT = "@alfaze.ulfat -- Good Night :)"
 
-# Hindi fonts
 HINDI_FONTS = [
     "/usr/share/fonts/truetype/noto/NotoSerifDevanagari-Regular.ttf",
     "/usr/share/fonts/truetype/noto/NotoSerifDevanagari-Medium.ttf",
@@ -25,12 +24,10 @@ HINDI_FONTS = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
 ]
 
-# English footer fonts - ye boxes fix karega
 ENGLISH_FONTS = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-    "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
 ]
 
 def get_hindi_font(size):
@@ -67,7 +64,8 @@ def get_random_entry():
     return data[idx]
 
 def generate_background(prompt):
-    full = f"{prompt}, dark blue night aesthetic, 1080x1080, moody paper texture, high quality, no window frame, no text"
+    # No window, clean night sky for direct text
+    full = f"{prompt}, beautiful clear night sky with stars and soft moon, dark blue, no window, no frame, no building, clean, 1080x1080"
     url = f"https://image.pollinations.ai/prompt/{requests.utils.quote(full)}?width=1080&height=1080&nologo=true&model=flux&seed={random.randint(0,999999)}"
     print(f"Generating BG: {full[:80]}...")
     r = requests.get(url, timeout=90)
@@ -81,17 +79,10 @@ def generate_background(prompt):
 def create_poster(entry, bg_path):
     img = Image.open(bg_path).convert("RGBA")
     W,H = img.size
-    # Safe overlay - thoda zyada transparent + bigger
-    overlay = Image.new("RGBA",(W,H),(0,0,0,0))
-    draw_overlay = ImageDraw.Draw(overlay)
-    # Center safe zone: 20% to 75%
-    draw_overlay.rectangle([(W*0.05, H*0.25),(W*0.95, H*0.75)], fill=(0,0,15,110))
-    img = Image.alpha_composite(img, overlay)
+    # NO BOX - direct on background
     draw = ImageDraw.Draw(img)
     
-    # FIX 1: Text size chhota kiya 54 -> 42
-    main_font = get_hindi_font(42)
-    # FIX 2: Footer ke liye English font - boxes fix
+    main_font = get_hindi_font(44)  # Chhota for no cut
     footer_font = get_english_font(22)
     
     shayari = entry['shayari']
@@ -108,36 +99,36 @@ def create_poster(entry, bg_path):
         if cur: lines.append(cur)
         return lines
 
-    # FIX 3: Side padding badhaya W-180 -> W-240 (120px each side)
-    max_width = W - 240
+    max_width = W - 260  # More padding, no box so need safe
     lines = wrap(shayari, main_font, max_width)
     
-    # Center calculation with smaller line height
-    line_height = 62  # pehle 78 tha
+    line_height = 64
     total_height = len(lines) * line_height
-    start_y = (H - total_height)//2 - 10
-    start_x = 120  # pehle 90 tha - ab safe
+    start_y = (H - total_height)//2
 
     for line in lines:
-        # Center align each line
         bbox = draw.textbbox((0,0), line, font=main_font)
         text_w = bbox[2] - bbox[0]
         x = (W - text_w)//2
-        # Soft shadow for readability
-        draw.text((x+2, start_y+2), line, font=main_font, fill="#000000", stroke_width=0)
-        draw.text((x, start_y), line, font=main_font, fill="#F5F1E8", stroke_width=0)
+        
+        # Strong glow/shadow for direct background visibility - NO BOX NEEDED
+        # Multiple shadows for glow effect
+        for dx, dy in [(-2,-2), (-2,2), (2,-2), (2,2), (-1,0), (1,0), (0,-1), (0,1)]:
+            draw.text((x+dx, start_y+dy), line, font=main_font, fill="#000000")
+        # Main text in soft white
+        draw.text((x, start_y), line, font=main_font, fill="#FFFFFF")
         start_y += line_height
 
-    # FIX 4: Footer with English font - bottom right but safe
+    # Footer - English font so no boxes
     bbox = draw.textbbox((0,0), footer, font=footer_font)
     fx = W - (bbox[2]-bbox[0]) - 35
-    fy = H - (bbox[3]-bbox[1]) - 30
-    # Footer background for visibility
+    fy = H - (bbox[3]-bbox[1]) - 35
+    # Shadow
     draw.text((fx+1, fy+1), footer, font=footer_font, fill="#000000")
-    draw.text((fx, fy), footer, font=footer_font, fill="#E8DDD0")
+    draw.text((fx, fy), footer, font=footer_font, fill="#E0E0E0")
     
     img.convert("RGB").save(OUTPUT_IMAGE, quality=95)
-    print(f"Poster created: {OUTPUT_IMAGE} - Lines: {len(lines)} Font: 42px")
+    print(f"Poster created NO BOX: {OUTPUT_IMAGE} Lines:{len(lines)}")
     return OUTPUT_IMAGE
 
 def upload_to_uguu(p):
@@ -156,90 +147,70 @@ def upload_to_uguu(p):
 def publish_to_instagram(image_url, caption):
     token = os.environ.get("PAGE_ACCESS_TOKEN")
     ig_user_id = os.environ.get("IG_USER_ID")
-    print(f"DEBUG - IG_USER_ID: {bool(ig_user_id)} len={len(ig_user_id) if ig_user_id else 0}")
-    print(f"DEBUG - PAGE_ACCESS_TOKEN: {bool(token)} len={len(token) if token else 0}")
+    print(f"DEBUG IG_USER_ID: {bool(ig_user_id)} len={len(ig_user_id) if ig_user_id else 0}")
+    print(f"DEBUG TOKEN: {bool(token)} len={len(token) if token else 0}")
     if not token or not ig_user_id:
-        print("Skipping IG: Token or ID empty")
+        print("Skipping IG Feed")
         return False
     container_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media"
     payload = {"image_url": image_url, "caption": caption, "access_token": token}
     r = requests.post(container_url, data=payload, timeout=60)
-    print(f"IG Container: {r.status_code} - {r.text[:800]}")
+    print(f"IG Feed Container: {r.status_code} - {r.text[:600]}")
     if r.status_code != 200:
         return False
     creation_id = r.json().get("id")
     time.sleep(15)
     publish_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media_publish"
     r2 = requests.post(publish_url, data={"creation_id": creation_id, "access_token": token}, timeout=60)
-    print(f"IG Publish: {r2.status_code} - {r2.text[:800]}")
+    print(f"IG Feed Publish: {r2.status_code} - {r2.text[:600]}")
+    return r2.status_code == 200
+
+def publish_to_instagram_story(image_url):
+    token = os.environ.get("PAGE_ACCESS_TOKEN")
+    ig_user_id = os.environ.get("IG_USER_ID")
+    if not token or not ig_user_id:
+        return False
+    print(f"Publishing IG Story: {ig_user_id}")
+    container_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media"
+    payload = {"image_url": image_url, "media_type": "STORIES", "access_token": token}
+    r = requests.post(container_url, data=payload, timeout=60)
+    print(f"IG Story Container: {r.status_code} - {r.text[:600]}")
+    if r.status_code != 200:
+        return False
+    creation_id = r.json().get("id")
+    time.sleep(15)
+    publish_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media_publish"
+    r2 = requests.post(publish_url, data={"creation_id": creation_id, "access_token": token}, timeout=60)
+    print(f"IG Story Publish: {r2.status_code} - {r2.text[:600]}")
     return r2.status_code == 200
 
 def publish_to_facebook(image_url, caption):
     token = os.environ.get("PAGE_ACCESS_TOKEN")
     page_id = os.environ.get("PAGE_ID")
-    print(f"DEBUG - PAGE_ID: {bool(page_id)} len={len(page_id) if page_id else 0}")
     if not token or not page_id:
         return False
+    print(f"Publishing FB Feed: {page_id}")
     fb_url = f"https://graph.facebook.com/v20.0/{page_id}/photos"
     payload = {"url": image_url, "caption": caption, "access_token": token}
     r = requests.post(fb_url, data=payload, timeout=60)
-    print(f"FB Publish: {r.status_code} - {r.text[:800]}")
+    print(f"FB Feed: {r.status_code} - {r.text[:600]}")
     return r.status_code == 200
 
-
-def publish_to_instagram_story(image_url):
-    """Instagram Story - 24h story"""
-    token = os.environ.get("PAGE_ACCESS_TOKEN")
-    ig_user_id = os.environ.get("IG_USER_ID")
-    if not token or not ig_user_id:
-        print("Skipping IG Story: Token/ID empty")
-        return False
-    print(f"Publishing to IG Story: {ig_user_id}")
-    # Stories need media_type=STORIES
-    container_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media"
-    payload = {
-        "image_url": image_url,
-        "media_type": "STORIES",
-        "access_token": token
-    }
-    r = requests.post(container_url, data=payload, timeout=60)
-    print(f"IG Story Container: {r.status_code} - {r.text[:800]}")
-    if r.status_code != 200:
-        return False
-    creation_id = r.json().get("id")
-    if not creation_id:
-        return False
-    time.sleep(15)
-    publish_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media_publish"
-    r2 = requests.post(publish_url, data={"creation_id": creation_id, "access_token": token}, timeout=60)
-    print(f"IG Story Publish: {r2.status_code} - {r2.text[:800]}")
-    return r2.status_code == 200
-
 def publish_to_facebook_story(image_url):
-    """Facebook Page Story - 24h story"""
     token = os.environ.get("PAGE_ACCESS_TOKEN")
     page_id = os.environ.get("PAGE_ID")
     if not token or not page_id:
-        print("Skipping FB Story: Token/PageID empty")
         return False
-    print(f"Publishing to FB Story: {page_id}")
-    # FB Photo Stories API
+    print(f"Publishing FB Story: {page_id}")
     fb_url = f"https://graph.facebook.com/v20.0/{page_id}/photo_stories"
-    payload = {
-        "url": image_url,
-        "access_token": token
-    }
+    payload = {"url": image_url, "access_token": token}
     r = requests.post(fb_url, data=payload, timeout=60)
-    print(f"FB Story Publish: {r.status_code} - {r.text[:800]}")
-    # Fallback: try /stories endpoint if photo_stories fails
+    print(f"FB Story: {r.status_code} - {r.text[:600]}")
     if r.status_code != 200:
         fb_url2 = f"https://graph.facebook.com/v20.0/{page_id}/stories"
-        payload2 = {
-            "photo_image_url": image_url,
-            "access_token": token
-        }
+        payload2 = {"photo_image_url": image_url, "access_token": token}
         r2 = requests.post(fb_url2, data=payload2, timeout=60)
-        print(f"FB Story Fallback: {r2.status_code} - {r2.text[:800]}")
+        print(f"FB Story Fallback: {r2.status_code} - {r2.text[:600]}")
         return r2.status_code == 200
     return r.status_code == 200
 
@@ -257,7 +228,6 @@ if __name__=="__main__":
     print("\n--- Starting Publishing ---")
     ig_ok = publish_to_instagram(public_url, caption)
     fb_ok = publish_to_facebook(public_url, caption)
-    # Stories - no caption needed, image only
     ig_story_ok = publish_to_instagram_story(public_url)
     fb_story_ok = publish_to_facebook_story(public_url)
-    print(f"\nResults: IG Feed={'OK' if ig_ok else 'FAIL'} FB Feed={'OK' if fb_ok else 'FAIL'} IG Story={'OK' if ig_story_ok else 'FAIL'} FB Story={'OK' if fb_story_ok else 'FAIL'}")
+    print(f"\nResults: IG Feed={ig_ok} FB Feed={fb_ok} IG Story={ig_story_ok} FB Story={fb_story_ok}")
