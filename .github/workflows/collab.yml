@@ -2,9 +2,8 @@ name: Collab Finder Daily
 
 on:
   schedule:
-    # Roz subah 10:00 AM IST = 04:30 UTC
-    - cron: '30 4 * * *'
-  workflow_dispatch: # Manual run ka button
+        - cron: '30 4 * * *' # Roz 10 AM IST
+  workflow_dispatch: # Manual button
 
 jobs:
   find-collabs:
@@ -12,23 +11,26 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
+            - uses: actions/checkout@v4
+            - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+      
+            - name: Install requests
+        run: pip install requests
 
-      - name: Run Collab Finder
-        run: |
-          python collab/collab_finder.py
-          cat collab/data/collab_today.json
+            - name: Run Finder + Send Telegram
+        # YAHAN TOKEN DALNE KA JAGAH - Neeche dekho
+        env:
+          # Ye 2 line me token Secrets se aayega
+          # Tu yahan kuch mat likh, GitHub Settings > Secrets me daal
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}  # <-- 1. BotFather wala token
+          TELEGRAM_CHATID: ${{ secrets.TELEGRAM_CHATID }} # <-- 2. UserInfoBot wala ID
+        run: python collab/collab_finder.py
 
-      - name: Commit Today's List
+            - name: Commit Daily List
         run: |
           git config --global user.name "Alfaz Bot"
           git config --global user.email "bot@alfaze.ulfat"
-          git add collab/data/collab_today.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "Daily collab - $(date +'%d-%m-%Y')"
-          git push
+          git add collab/data/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🤝 daily collab $(date +%d-%m)" && git push)
