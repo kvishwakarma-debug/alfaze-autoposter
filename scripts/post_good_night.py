@@ -119,11 +119,10 @@ def create_poster(entry, bg_path):
         draw.text((x, start_y), line, font=main_font, fill="#FFFFFF")
         start_y += line_height
 
-    # Footer - English font so no boxes
-    bbox = draw.textbbox((0,0), footer, font=footer_font)
-    fx = W - (bbox[2]-bbox[0]) - 35
-    fy = H - (bbox[3]-bbox[1]) - 35
-    # Shadow
+    # Footer - LEFT SIDE with margin - no cut
+    fx = 40  # left margin 40px
+    fy = H - 45  # bottom margin 45px
+    # Shadow for visibility
     draw.text((fx+1, fy+1), footer, font=footer_font, fill="#000000")
     draw.text((fx, fy), footer, font=footer_font, fill="#E0E0E0")
     
