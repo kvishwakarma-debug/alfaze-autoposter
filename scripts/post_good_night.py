@@ -1,18 +1,12 @@
 """
-Good Night Auto Poster - Alfaze Ulfat
+Good Night Auto Poster - Alfaze Ulfat - FINAL WITH PUBLISHING
 Location: scripts/post_good_night.py
-JSON: scripts/good_night_shayari_with_backgrounds.json
-Style: Night paper texture + crescent moon + clean serif Hindi font (final locked)
 """
 
-import json
-import random
-import os
-import requests
+import json, random, os, requests, time
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 
-# --- PATHS - tumhare file structure ke hisab se ---
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 JSON_FILE = os.path.join(os.path.dirname(__file__), "good_night_shayari_with_backgrounds.json")
 TRACKER_FILE = os.path.join(os.path.dirname(__file__), "last_good_night_index.json")
@@ -60,6 +54,7 @@ def generate_background(prompt):
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         open(OUTPUT_IMAGE,'wb').write(r.content)
         return OUTPUT_IMAGE
+    print(f"BG failed {r.status_code}")
     return None
 
 def create_poster(entry, bg_path):
@@ -70,10 +65,9 @@ def create_poster(entry, bg_path):
     img = Image.alpha_composite(img, overlay)
     draw = ImageDraw.Draw(img)
     main_font = get_font(54)
-    footer_font = get_font(26) # thoda bada - final locked
+    footer_font = get_font(26)
     shayari = entry['shayari']
     footer = entry.get('footer_text', FOOTER_TEXT)
-
     def wrap(text,font,max_w):
         words=text.split(); lines=[]; cur=""
         for w in words:
@@ -84,14 +78,12 @@ def create_poster(entry, bg_path):
             else: cur=test
         if cur: lines.append(cur)
         return lines
-
     lines = wrap(shayari, main_font, W-180)
     start_y = H//2 - len(lines)*39 - 20
     start_x = 90
     for line in lines:
         draw.text((start_x,start_y),line,font=main_font,fill="#F5F1E8",stroke_width=1,stroke_fill="#1A1A2E")
         start_y+=78
-
     bbox = draw.textbbox((0,0),footer,font=footer_font)
     fx = W - (bbox[2]-bbox[0]) - 45
     fy = H - (bbox[3]-bbox[1]) - 40
@@ -101,20 +93,95 @@ def create_poster(entry, bg_path):
     return OUTPUT_IMAGE
 
 def upload_to_uguu(p):
+    print(f"Uploading {p} to uguu.se...")
     try:
         r = requests.post("https://uguu.se/upload.php", files={"files[]": open(p,'rb')}, timeout=60)
         if r.status_code==200:
-            url = r.json()['files'][0]['url']
+            j = r.json()
+            url = j['files'][0]['url']
             print(f"uguu URL: {url}")
             return url
+        print(f"uguu failed: {r.text[:200]}")
     except Exception as e:
-        print(e)
+        print(f"uguu error: {e}")
     return None
+
+def publish_to_instagram(image_url, caption):
+    """Graph API v20.0 - same fix as English quotes"""
+    token = os.environ.get("ACCESS_TOKEN")
+    ig_user_id = os.environ.get("IG_USER_ID")
+    if not token or not ig_user_id:
+        print("Skipping IG: ACCESS_TOKEN or IG_USER_ID not set")
+        return False
+    
+    print(f"Publishing to Instagram: {ig_user_id}")
+    # Step 1: Create container
+    container_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media"
+    payload = {
+        "image_url": image_url,
+        "caption": caption,
+        "access_token": token
+    }
+    r = requests.post(container_url, data=payload, timeout=60)
+    print(f"IG Container Response: {r.status_code} - {r.text[:500]}")
+    if r.status_code != 200:
+        return False
+    
+    creation_id = r.json().get("id")
+    if not creation_id:
+        return False
+    
+    # Wait for processing
+    time.sleep(10)
+    
+    # Step 2: Publish
+    publish_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media_publish"
+    payload2 = {
+        "creation_id": creation_id,
+        "access_token": token
+    }
+    r2 = requests.post(publish_url, data=payload2, timeout=60)
+    print(f"IG Publish Response: {r2.status_code} - {r2.text[:500]}")
+    return r2.status_code == 200
+
+def publish_to_facebook(image_url, caption):
+    token = os.environ.get("ACCESS_TOKEN")
+    page_id = os.environ.get("FB_PAGE_ID")
+    if not token or not page_id:
+        print("Skipping FB: ACCESS_TOKEN or FB_PAGE_ID not set")
+        return False
+    
+    print(f"Publishing to Facebook Page: {page_id}")
+    fb_url = f"https://graph.facebook.com/v20.0/{page_id}/photos"
+    payload = {
+        "url": image_url,
+        "caption": caption,
+        "access_token": token
+    }
+    r = requests.post(fb_url, data=payload, timeout=60)
+    print(f"FB Publish Response: {r.status_code} - {r.text[:500]}")
+    return r.status_code == 200
 
 if __name__=="__main__":
     entry = get_random_entry()
     print(f"Selected [{entry['id']}]: {entry['shayari']}")
+    
     bg = generate_background(entry['background_prompt'])
+    if not bg:
+        exit(1)
+    
     poster = create_poster(entry, bg)
     public_url = upload_to_uguu(poster)
+    
+    if not public_url:
+        print("Failed to get public URL, cannot publish")
+        exit(1)
+    
+    caption = f"{entry['shayari']}\n\n{FOOTER_TEXT}\n\n#goodnight #nightthoughts #alfazeulfat #shayari #hindishayari #raat #sukoon"
+    
+    print("\n--- Starting Publishing ---")
+    ig_ok = publish_to_instagram(public_url, caption)
+    fb_ok = publish_to_facebook(public_url, caption)
+    
+    print(f"\nResults: IG={'OK' if ig_ok else 'FAIL'} FB={'OK' if fb_ok else 'FAIL'}")
     print(f"Done: {poster} -> {public_url}")
