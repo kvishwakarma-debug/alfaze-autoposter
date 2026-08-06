@@ -1,0 +1,59 @@
+name: Post Good Night Shayari
+
+on:
+  schedule:
+    - cron: '30 16 * * *' # 10:00 PM IST = 4:30 PM UTC
+  workflow_dispatch:
+
+jobs:
+  post-good-night:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Hindi fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-core fonts-noto-cjk
+          fc-list | grep -i Devanagari
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install Pillow requests
+
+      - name: Generate Good Night Poster
+        run: |
+          python scripts/post_good_night.py
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+
+      - name: Commit tracker and image
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add scripts/last_good_night_index.json output/good_night.jpg || true
+          git diff --staged --quiet || git commit -m "Auto: Good Night poster $(date +'%Y-%m-%d')"
+          git push || echo "No changes to push"
+
+      - name: Publish to Instagram / Facebook
+        run: |
+          echo "Calling your publishers/ folder - same as English quotes"
+          # Agar tumhare publishers me function hai to:
+          # python publishers/facebook_publisher.py --image output/good_night.jpg
+          # python publishers/story_publisher.py --image output/good_night.jpg
+          python -c "
+          import os, requests
+          # Yahan tumhara existing Graph v20.0 posting logic ayega
+          # Jaise post_english_quotes.yml me hai
+          print('Poster ready for publishing - add publisher calls if needed')
+          "
