@@ -3,20 +3,37 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from PIL import Image
 if not hasattr(Image, 'ANTIALIAS'):
     Image.ANTIALIAS = Image.LANCZOS
-from publishers.youtube_music import ensure_music_for_shayari
+# OLD MUSIC SYSTEM HATAYA
 from publishers.story_publisher import post_to_story
 from publishers.facebook_publisher import post_to_fb_reel
 import requests, time, subprocess, urllib.parse, datetime
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 try:
     from moviepy.editor import ImageClip, AudioFileClip
+    from moviepy.audio.fx.audio_loop import audio_loop
 except ModuleNotFoundError:
     from moviepy import ImageClip, AudioFileClip
+    from moviepy.audio.fx.audio_loop import audio_loop
 
 IG_USER_ID = os.getenv("IG_USER_ID")
 ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
 PAGE_ID = os.getenv("PAGE_ID")
 REPO = os.getenv("GITHUB_REPOSITORY")
+
+# ===== NAYA CHANGE 1: 3 GAANO KA LIST =====
+SONGS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets")
+SONGS = [
+    os.path.join(SONGS_DIR, "sukoon_lofi.mp3"),
+    os.path.join(SONGS_DIR, "tumse_lofi.mp3"),
+    os.path.join(SONGS_DIR, "khogaye_lofi.mp3")
+]
+# Agar assets root me hai to fallback
+if not os.path.exists(SONGS[0]):
+    SONGS = [
+        "assets/sukoon_lofi.mp3",
+        "assets/tumse_lofi.mp3",
+        "assets/khogaye_lofi.mp3"
+    ]
 
 def load_shayaris():
     p = os.path.join(os.path.dirname(__file__), "shayari_data.json")
@@ -61,7 +78,6 @@ def create_chai_post(shayari_data, day_num):
     print(f"BG Gen Day {day_num}")
     r = requests.get(bg_url, timeout=120)
     open("bg.jpg","wb").write(r.content)
-    # FIX 1: Stretch fix - fit se crop hoga, khichega nahi (manual quality)
     bg_temp = Image.open("bg.jpg").convert("RGB")
     full_img = ImageOps.fit(bg_temp, (1080, 1920), method=Image.LANCZOS, centering=(0.5, 0.5))
     draw = ImageDraw.Draw(full_img, "RGBA")
@@ -98,38 +114,60 @@ def create_chai_post(shayari_data, day_num):
 
 def image_to_reel_with_music(image_path, day_num, shayari_data):
     try:
-        music_path = ensure_music_for_shayari(shayari_data)
-        print(f"Music path: {music_path}")
+        # ===== NAYA CHANGE 2: Alternate Song Logic =====
+        song_index = (day_num - 1) % len(SONGS)
+        music_path = SONGS[song_index]
+
+        # Check karo file hai ya nahi
+        if not os.path.exists(music_path):
+            print(f"WARNING: {music_path} nahi mila, dusra try kar raha hu")
+            # Jo milega wohi use kar lo
+            for s in SONGS:
+                if os.path.exists(s):
+                    music_path = s
+                    break
+
+        print(f"Music selected for Day {day_num}: {music_path} (Index {song_index})")
+
         ts = int(datetime.datetime.now().timestamp())
         out_hd = f"public/images/reel_day{day_num}_{ts}.mp4"
         out_story = f"public/images/story_day{day_num}_{ts}.mp4"
+
         def make_video(out_path, bitrate):
             clip = ImageClip(image_path).set_duration(7)
             if music_path and os.path.exists(music_path) and os.path.getsize(music_path) > 1000:
                 try:
                     audio = AudioFileClip(music_path)
                     if audio.duration < 7:
-                        audio = audio.set_duration(7)
+                        # Loop karo agar chota hai
+                        try:
+                            audio = audio.fx(audio_loop, duration=7)
+                        except:
+                            audio = audio.set_duration(7)
                     else:
-                        start = random.uniform(0, max(0, audio.duration-7))
+                        # Beech ka accha part lo
+                        start = random.uniform(10, max(10, audio.duration-7-10))
                         audio = audio.subclip(start, start+7)
-                    audio = audio.volumex(0.55)
+                    audio = audio.volumex(0.35) # Halka volume taaki shayari feel rahe
                     clip = clip.set_audio(audio)
-                    print(f"Audio mixed vol 0.55: {music_path}")
+                    print(f"Audio mixed vol 0.35: {music_path}")
                 except Exception as e:
                     print(f"Audio mix error: {e}")
             clip.write_videofile(out_path, fps=30, codec='libx264', audio_codec='aac', bitrate=bitrate, logger=None)
             return out_path
+
         make_video(out_hd, "5000k")
         make_video(out_story, "1500k")
         subprocess.run(["git","add",out_hd, out_story], check=True)
-        subprocess.run(["git","commit","-m",f"Add Reels {day_num}"], check=True)
+        subprocess.run(["git","commit","-m",f"Add Reels {day_num} with song {song_index+1}"], check=True)
         subprocess.run(["git","push"], check=True)
         time.sleep(10)
         base = f"https://raw.githubusercontent.com/{REPO}/main/"
         return base+out_hd, base+out_story
     except Exception as e:
         print(f"Reel fail: {e}")
+        import traceback
+        traceback.print_exc()
         return None, None
 
 def make_caption(shayari_data, day_num):
