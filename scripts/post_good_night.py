@@ -13,9 +13,8 @@ from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 
 # --- PATHS - tumhare file structure ke hisab se ---
-BASE_DIR = os.path.dirname(os.path.dirname(__file__)) if os.path.exists(os.path.join(os.path.dirname(__file__), "..", ".github")) else "."
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 JSON_FILE = os.path.join(os.path.dirname(__file__), "good_night_shayari_with_backgrounds.json")
-# Tracker ko scripts me rakho jaise english wala hoga
 TRACKER_FILE = os.path.join(os.path.dirname(__file__), "last_good_night_index.json")
 OUTPUT_DIR = os.path.join(BASE_DIR, "output")
 OUTPUT_IMAGE = os.path.join(OUTPUT_DIR, "good_night.jpg")
@@ -71,7 +70,7 @@ def create_poster(entry, bg_path):
     img = Image.alpha_composite(img, overlay)
     draw = ImageDraw.Draw(img)
     main_font = get_font(54)
-    footer_font = get_font(26)  # thoda bada - final locked
+    footer_font = get_font(26) # thoda bada - final locked
     shayari = entry['shayari']
     footer = entry.get('footer_text', FOOTER_TEXT)
 
@@ -119,5 +118,3 @@ if __name__=="__main__":
     poster = create_poster(entry, bg)
     public_url = upload_to_uguu(poster)
     print(f"Done: {poster} -> {public_url}")
-    # Yahan se tumhara publishers/instagram_reel_publisher.py ya facebook_publisher.py call kar sakte ho
-    # jaise post_english_quotes.py me kar rahe ho
