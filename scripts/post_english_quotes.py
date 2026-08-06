@@ -1,7 +1,7 @@
 """
-Good Night Auto Poster - Alfaze Ulfat - FINAL FIXED for PAGE_ACCESS_TOKEN
+Good Night Auto Poster - Alfaze Ulfat - FINAL
 Location: scripts/post_good_night.py
-JSON: scripts/good_night_shayari_with_backgrounds.json
+Uses: IG_USER_ID, PAGE_ACCESS_TOKEN, PAGE_ID (same as English Quotes)
 """
 
 import json, random, os, requests, time
@@ -21,14 +21,6 @@ FONT_CANDIDATES = [
     "/usr/share/fonts/truetype/noto/NotoSerifDevanagari-Medium.ttf",
     "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf",
 ]
-
-def get_env(*names):
-    for n in names:
-        v = os.environ.get(n)
-        if v and v.strip():
-            print(f"Found env {n} -> {v[:15]}...")
-            return v
-    return None
 
 def get_font(size):
     for p in FONT_CANDIDATES:
@@ -115,39 +107,50 @@ def upload_to_uguu(p):
     return None
 
 def publish_to_instagram(image_url, caption):
-    # Tumhara English wala PAGE_ACCESS_TOKEN use karta hai
-    token = get_env("PAGE_ACCESS_TOKEN", "ACCESS_TOKEN", "FB_ACCESS_TOKEN", "IG_ACCESS_TOKEN", "FACEBOOK_TOKEN", "TOKEN")
-    ig_user_id = get_env("IG_USER_ID", "INSTAGRAM_USER_ID", "IG_ID")
-    if not token or not ig_user_id:
-        print(f"Skipping IG: token found={bool(token)} ig_user_id found={bool(ig_user_id)}")
+    # EXACT same env names as English Quotes workflow
+    token = os.environ.get("PAGE_ACCESS_TOKEN")
+    ig_user_id = os.environ.get("IG_USER_ID")
+    
+    print(f"DEBUG - IG_USER_ID exists: {bool(ig_user_id)} len: {len(ig_user_id) if ig_user_id else 0}")
+    print(f"DEBUG - PAGE_ACCESS_TOKEN exists: {bool(token)} len: {len(token) if token else 0}")
+    
+    if not token:
+        print("ERROR: PAGE_ACCESS_TOKEN is empty! Check GitHub Secrets")
         return False
+    if not ig_user_id:
+        print("ERROR: IG_USER_ID is empty!")
+        return False
+        
     print(f"Publishing to Instagram: {ig_user_id}")
     container_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media"
     payload = {"image_url": image_url, "caption": caption, "access_token": token}
     r = requests.post(container_url, data=payload, timeout=60)
-    print(f"IG Container: {r.status_code} - {r.text[:600]}")
+    print(f"IG Container: {r.status_code} - {r.text[:800]}")
     if r.status_code != 200:
         return False
     creation_id = r.json().get("id")
     if not creation_id:
         return False
-    time.sleep(12)
+    time.sleep(15)
     publish_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media_publish"
     r2 = requests.post(publish_url, data={"creation_id": creation_id, "access_token": token}, timeout=60)
-    print(f"IG Publish: {r2.status_code} - {r2.text[:600]}")
+    print(f"IG Publish: {r2.status_code} - {r2.text[:800]}")
     return r2.status_code == 200
 
 def publish_to_facebook(image_url, caption):
-    token = get_env("PAGE_ACCESS_TOKEN", "ACCESS_TOKEN", "FB_ACCESS_TOKEN", "FACEBOOK_TOKEN")
-    page_id = get_env("PAGE_ID", "FB_PAGE_ID", "FACEBOOK_PAGE_ID")
+    token = os.environ.get("PAGE_ACCESS_TOKEN")
+    page_id = os.environ.get("PAGE_ID")
+    
+    print(f"DEBUG - PAGE_ID exists: {bool(page_id)} len: {len(page_id) if page_id else 0}")
+    
     if not token or not page_id:
-        print(f"Skipping FB: token found={bool(token)} page_id found={bool(page_id)}")
+        print(f"Skipping FB: token={bool(token)} page_id={bool(page_id)}")
         return False
     print(f"Publishing to Facebook Page: {page_id}")
     fb_url = f"https://graph.facebook.com/v20.0/{page_id}/photos"
     payload = {"url": image_url, "caption": caption, "access_token": token}
     r = requests.post(fb_url, data=payload, timeout=60)
-    print(f"FB Publish: {r.status_code} - {r.text[:600]}")
+    print(f"FB Publish: {r.status_code} - {r.text[:800]}")
     return r.status_code == 200
 
 if __name__=="__main__":
@@ -160,7 +163,7 @@ if __name__=="__main__":
     public_url = upload_to_uguu(poster)
     if not public_url:
         exit(1)
-    caption = f"{entry['shayari']}\n\n{FOOTER_TEXT}\n\n#goodnight #alfazeulfat #shayari #nightthoughts"
+    caption = f"{entry['shayari']}\n\n{FOOTER_TEXT}\n\n#goodnight #alfazeulfat #shayari"
     print("\n--- Starting Publishing ---")
     ig_ok = publish_to_instagram(public_url, caption)
     fb_ok = publish_to_facebook(public_url, caption)
