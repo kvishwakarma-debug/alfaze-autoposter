@@ -2,7 +2,7 @@ name: Post Good Night Shayari
 
 on:
   schedule:
-    - cron: '30 16 * * *' # 10:00 PM IST = 4:30 PM UTC
+    - cron: '30 16 * * *'  # 10:00 PM IST = 4:30 PM UTC
   workflow_dispatch:
 
 jobs:
@@ -29,31 +29,25 @@ jobs:
           pip install --upgrade pip
           pip install Pillow requests
 
-      - name: Generate Good Night Poster
+      - name: Generate and Publish Good Night Poster
         run: |
           python scripts/post_good_night.py
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }}
+          FACEBOOK_TOKEN: ${{ secrets.FACEBOOK_TOKEN }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+          PAGE_ID: ${{ secrets.PAGE_ID }}
 
       - name: Commit tracker and image
+        if: always()
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add scripts/last_good_night_index.json output/good_night.jpg || true
           git diff --staged --quiet || git commit -m "Auto: Good Night poster $(date +'%Y-%m-%d')"
           git push || echo "No changes to push"
-
-      - name: Publish to Instagram / Facebook
-        run: |
-          echo "Calling your publishers/ folder - same as English quotes"
-          # Agar tumhare publishers me function hai to:
-          # python publishers/facebook_publisher.py --image output/good_night.jpg
-          # python publishers/story_publisher.py --image output/good_night.jpg
-          python -c "
-          import os, requests
-          # Yahan tumhara existing Graph v20.0 posting logic ayega
-          # Jaise post_english_quotes.yml me hai
-          print('Poster ready for publishing - add publisher calls if needed')
-          "
