@@ -1,250 +1,167 @@
-# scripts/post_english_quotes.py - ULTIMATE FIX - Working Uploader + Correct Flow
-import sys, os, json, re, glob, textwrap, random, time, requests, urllib.parse, datetime
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+"""
+Good Night Auto Poster - Alfaze Ulfat - FINAL FIXED for PAGE_ACCESS_TOKEN
+Location: scripts/post_good_night.py
+JSON: scripts/good_night_shayari_with_backgrounds.json
+"""
+
+import json, random, os, requests, time
+from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 
-IG_USER_ID = os.getenv("IG_USER_ID")
-ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
-PAGE_ID = os.getenv("PAGE_ID")
-REPO = os.getenv("GITHUB_REPOSITORY")
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+JSON_FILE = os.path.join(os.path.dirname(__file__), "good_night_shayari_with_backgrounds.json")
+TRACKER_FILE = os.path.join(os.path.dirname(__file__), "last_good_night_index.json")
+OUTPUT_DIR = os.path.join(BASE_DIR, "output")
+OUTPUT_IMAGE = os.path.join(OUTPUT_DIR, "good_night.jpg")
 
-def load_quotes():
-    p = os.path.join(os.path.dirname(__file__), "english_quotes_data.json")
-    with open(p, "r", encoding="utf-8") as f:
-        return json.load(f)
+FOOTER_TEXT = "@alfaze.ulfat -- Good Night :)"
 
-QUOTES_LIST = load_quotes()
+FONT_CANDIDATES = [
+    "/usr/share/fonts/truetype/noto/NotoSerifDevanagari-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSerifDevanagari-Medium.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf",
+]
 
-def get_next_quote():
-    existing = glob.glob("public/images/en_day*_*.jpg")
-    max_day = 0
-    for f in existing:
-        m = re.search(r'en_day(\d+)_', os.path.basename(f))
-        if m:
-            d = int(m.group(1))
-            if d > max_day:
-                max_day = d
-    next_day = max_day + 1 if max_day > 0 else 1
-    idx = (next_day - 1) % len(QUOTES_LIST)
-    for item in QUOTES_LIST:
-        if item.get('id') == next_day:
-            return item, next_day
-    return QUOTES_LIST[idx], next_day
-
-def wrap_text_smart(text, width=32):
-    lines = []
-    for para in text.split("\n"):
-        wrapped = textwrap.wrap(para, width=width, break_long_words=False)
-        lines.extend(wrapped if wrapped else [""])
-    return lines
-
-def get_background_image(prompt, day_num):
-    encoded = urllib.parse.quote(prompt + ", photorealistic, cinematic, dark blue tones, lonely, no text, rainy cafe night")
-    sources = [
-        f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1080&nologo=true&seed={day_num+random.randint(1,99999)}",
-        f"https://source.unsplash.com/1080x1080/?cafe,rain,night,moody,dark&sig={day_num+random.randint(1,99999)}",
-        f"https://picsum.photos/seed/{day_num+random.randint(1,99999)}/1080/1080"
-    ]
-    for attempt, url in enumerate(sources):
-        try:
-            r = requests.get(url, timeout=40, headers={'User-Agent': 'Mozilla/5.0'}, allow_redirects=True)
-            if r.status_code == 200 and len(r.content) > 15000:
-                with open("bg_en.jpg","wb") as f:
-                    f.write(r.content)
-                try:
-                    with Image.open("bg_en.jpg") as test:
-                        test.verify()
-                    img = Image.open("bg_en.jpg").convert("RGB")
-                    if attempt > 0:
-                        overlay = Image.new("RGB", img.size, (18, 28, 48))
-                        img = Image.blend(img, overlay, 0.35)
-                        img = img.point(lambda p: int(p * 0.75))
-                    return img
-                except:
-                    continue
-        except:
-            time.sleep(1)
-    img = Image.new("RGB", (1080,1080), (12, 20, 35))
-    draw = ImageDraw.Draw(img, "RGBA")
-    for _ in range(22):
-        x = random.randint(0,1080); y = random.randint(0,700); rad = random.randint(25,90); b = random.randint(50,160)
-        draw.ellipse([x-rad, y-rad, x+rad, y+rad], fill=(b, b//2, b//3, 70))
-    return img
-
-def create_quote_post(quote_data, day_num):
-    prompt = quote_data.get('bg_prompt', 'dark rainy cafe interior at night, moody lonely aesthetic')
-    full_img = get_background_image(prompt, day_num).resize((1080,1080), Image.LANCZOS)
-    overlay = Image.new("RGBA", full_img.size, (0,0,0,0))
-    d = ImageDraw.Draw(overlay)
-    for y in range(1080):
-        if y > 480:
-            alpha = int((y-480)/600 * 235)
-            d.rectangle([0,y,1080,y+1], fill=(0,0,0,alpha))
-    full_img = Image.alpha_composite(full_img.convert("RGBA"), overlay).convert("RGB")
-    draw = ImageDraw.Draw(full_img)
-    try:
-        font_quote = ImageFont.truetype("/usr/share/fonts/liberation-serif/LiberationSerif-Italic.ttf", 42)
-        font_wm = ImageFont.truetype("/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif.ttf", 19)
-    except:
-        font_quote = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf", 42)
-        font_wm = ImageFont.load_default()
-    wrapped_lines = wrap_text_smart(quote_data.get('text',''), width=32)[:4]
-    y = 1080 - (len(wrapped_lines)*60) - 140
-    for line in wrapped_lines:
-        bbox = draw.textbbox((0,0), line, font=font_quote)
-        x = (1080 - (bbox[2]-bbox[0]))//2
-        draw.text((x+2, y+2), line, font=font_quote, fill="black")
-        draw.text((x, y), line, font=font_quote, fill="white")
-        y+=60
-    wm = "— @Alfaz-e-Ulfat"
-    ww = draw.textbbox((0,0), wm, font=font_wm)[2]
-    draw.text(((1080-ww)//2, 1035), wm, font=font_wm, fill=(230,230,230))
-    os.makedirs("public/images", exist_ok=True)
-    ts = int(datetime.datetime.now().timestamp())
-    feed_path = f"public/images/en_day{day_num}_{ts}.jpg"
-    full_img.save(feed_path, "JPEG", quality=96)
-    print(f"Saved to {feed_path}")
-    return feed_path
-
-def get_instant_url(image_path):
-    print("Uploading for instant URL...")
-    # Try 1: Uguu.se - currently most stable
-    try:
-        print("Trying uguu.se...")
-        with open(image_path, 'rb') as f:
-            r = requests.post("https://uguu.se/upload.php", files={"files[]": f}, timeout=30)
-            print(f"uguu response: {r.status_code} - {r.text[:300]}")
-            if r.status_code == 200:
-                j = r.json()
-                if "files" in j and len(j["files"]) > 0:
-                    url = j["files"][0]["url"]
-                    print(f"uguu SUCCESS: {url}")
-                    return url
-    except Exception as e:
-        print(f"uguu failed: {e}")
-
-    # Try 2: tmpfiles.org
-    try:
-        print("Trying tmpfiles.org...")
-        with open(image_path, 'rb') as f:
-            r = requests.post("https://tmpfiles.org/api/v1/upload", files={"file": f}, timeout=30)
-            print(f"tmpfiles: {r.text[:400]}")
-            j = r.json()
-            if j.get("status") == "success":
-                page_url = j["data"]["url"]
-                # convert to direct dl link
-                dl_url = page_url.replace("https://tmpfiles.org/", "https://tmpfiles.org/dl/")
-                print(f"tmpfiles SUCCESS: {dl_url}")
-                return dl_url
-    except Exception as e:
-        print(f"tmpfiles failed: {e}")
-
-    # Try 3: file.io
-    try:
-        print("Trying file.io...")
-        with open(image_path, 'rb') as f:
-            r = requests.post("https://file.io", files={"file": f}, timeout=30)
-            print(f"file.io: {r.text[:400]}")
-            j = r.json()
-            if j.get("success"):
-                url = j.get("link")
-                print(f"file.io SUCCESS: {url}")
-                return url
-    except Exception as e:
-        print(f"file.io failed: {e}")
-
-    # Try 4: Catbox Litterbox (72h temp)
-    try:
-        print("Trying litterbox...")
-        with open(image_path, 'rb') as f:
-            r = requests.post("https://litterbox.catbox.moe/resources/internals/api.php",
-                              data={"reqtype": "fileupload", "time": "72h"},
-                              files={"fileToUpload": f}, timeout=30)
-            print(f"litterbox: {r.status_code} - {r.text[:200]}")
-            if r.status_code == 200 and "https://" in r.text:
-                url = r.text.strip()
-                print(f"litterbox SUCCESS: {url}")
-                return url
-    except Exception as e:
-        print(f"litterbox failed: {e}")
-
-    print("All instant uploaders failed!")
+def get_env(*names):
+    for n in names:
+        v = os.environ.get(n)
+        if v and v.strip():
+            print(f"Found env {n} -> {v[:15]}...")
+            return v
     return None
 
-def make_caption(quote_data, day_num):
-    tags = quote_data.get('hashtags', '#DeepQuotes #AlfazeUlfat #EnglishQuotes #HealingQuotes')
-    return f"{quote_data.get('text','')}\n\n.\n.\n{tags}"
+def get_font(size):
+    for p in FONT_CANDIDATES:
+        if os.path.exists(p):
+            try:
+                return ImageFont.truetype(p, size)
+            except:
+                pass
+    return ImageFont.load_default()
 
-def post_to_insta_post(image_url, caption):
-    print(f"Posting INSTA POST with URL: {image_url}")
-    r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media",
-                       data={"image_url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
-    print(f"Post Container: {r1}")
-    if "id" not in r1: return r1
-    for _ in range(15):
-        time.sleep(3)
-        s = requests.get(f"https://graph.facebook.com/v20.0/{r1['id']}?fields=status_code&access_token={ACCESS_TOKEN}").json()
-        print(f"Post status: {s}")
-        if s.get("status_code") == "FINISHED" or "status_code" not in s: break
-    r2 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media_publish",
-                       data={"creation_id": r1["id"], "access_token": ACCESS_TOKEN}).json()
-    print(f"Post Publish: {r2}"); return r2
+def get_random_entry():
+    with open(JSON_FILE, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    last_idx = -1
+    if os.path.exists(TRACKER_FILE):
+        try:
+            last_idx = json.load(open(TRACKER_FILE, encoding='utf-8')).get('last_index', -1)
+        except:
+            pass
+    idx = random.randint(0, len(data)-1)
+    while idx == last_idx and len(data) > 1:
+        idx = random.randint(0, len(data)-1)
+    json.dump({"last_index": idx, "last_id": data[idx]['id'], "time": str(datetime.now())}, open(TRACKER_FILE,'w',encoding='utf-8'), ensure_ascii=False, indent=2)
+    return data[idx]
 
-def post_to_insta_story(image_url):
-    print(f"Posting STORY with URL: {image_url}")
+def generate_background(prompt):
+    full = f"{prompt}, dark blue night aesthetic, 1080x1080, moody paper texture, high quality"
+    url = f"https://image.pollinations.ai/prompt/{requests.utils.quote(full)}?width=1080&height=1080&nologo=true&model=flux&seed={random.randint(0,999999)}"
+    print(f"Generating BG: {full[:80]}...")
+    r = requests.get(url, timeout=90)
+    if r.status_code == 200:
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        open(OUTPUT_IMAGE,'wb').write(r.content)
+        return OUTPUT_IMAGE
+    print(f"BG failed {r.status_code}")
+    return None
+
+def create_poster(entry, bg_path):
+    img = Image.open(bg_path).convert("RGBA")
+    W,H = img.size
+    overlay = Image.new("RGBA",(W,H),(0,0,0,0))
+    ImageDraw.Draw(overlay).rectangle([(0,H*0.30),(W,H*0.68)], fill=(0,0,20,75))
+    img = Image.alpha_composite(img, overlay)
+    draw = ImageDraw.Draw(img)
+    main_font = get_font(54)
+    footer_font = get_font(26)
+    shayari = entry['shayari']
+    footer = entry.get('footer_text', FOOTER_TEXT)
+    def wrap(text,font,max_w):
+        words=text.split(); lines=[]; cur=""
+        for w in words:
+            test=cur+" "+w if cur else w
+            if draw.textbbox((0,0),test,font=font)[2] > max_w:
+                if cur: lines.append(cur)
+                cur=w
+            else: cur=test
+        if cur: lines.append(cur)
+        return lines
+    lines = wrap(shayari, main_font, W-180)
+    start_y = H//2 - len(lines)*39 - 20
+    start_x = 90
+    for line in lines:
+        draw.text((start_x,start_y),line,font=main_font,fill="#F5F1E8",stroke_width=1,stroke_fill="#1A1A2E")
+        start_y+=78
+    bbox = draw.textbbox((0,0),footer,font=footer_font)
+    fx = W - (bbox[2]-bbox[0]) - 45
+    fy = H - (bbox[3]-bbox[1]) - 40
+    draw.text((fx,fy),footer,font=footer_font,fill="#E8DDD0")
+    img.convert("RGB").save(OUTPUT_IMAGE, quality=96)
+    print(f"Poster created: {OUTPUT_IMAGE}")
+    return OUTPUT_IMAGE
+
+def upload_to_uguu(p):
+    print(f"Uploading {p} to uguu.se...")
     try:
-        r1 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media",
-                           data={"image_url": image_url, "media_type": "STORIES", "access_token": ACCESS_TOKEN}).json()
-        print(f"Story Container: {r1}")
-        if "id" not in r1: return r1
-        time.sleep(5)
-        r2 = requests.post(f"https://graph.facebook.com/v20.0/{IG_USER_ID}/media_publish",
-                           data={"creation_id": r1["id"], "access_token": ACCESS_TOKEN}).json()
-        print(f"Story Publish: {r2}"); return r2
+        r = requests.post("https://uguu.se/upload.php", files={"files[]": open(p,'rb')}, timeout=60)
+        if r.status_code==200:
+            url = r.json()['files'][0]['url']
+            print(f"uguu URL: {url}")
+            return url
+        print(f"uguu failed: {r.text[:200]}")
     except Exception as e:
-        print(e); return {"error": str(e)}
+        print(f"uguu error: {e}")
+    return None
 
-def post_to_facebook_page(image_url, caption):
-    print(f"Posting FB PAGE with URL: {image_url}")
-    try:
-        r = requests.post(f"https://graph.facebook.com/v20.0/{PAGE_ID}/photos",
-                          data={"url": image_url, "caption": caption, "access_token": ACCESS_TOKEN}).json()
-        print(f"FB Page Publish: {r}"); return r
-    except Exception as e:
-        print(e); return {"error": str(e)}
+def publish_to_instagram(image_url, caption):
+    # Tumhara English wala PAGE_ACCESS_TOKEN use karta hai
+    token = get_env("PAGE_ACCESS_TOKEN", "ACCESS_TOKEN", "FB_ACCESS_TOKEN", "IG_ACCESS_TOKEN", "FACEBOOK_TOKEN", "TOKEN")
+    ig_user_id = get_env("IG_USER_ID", "INSTAGRAM_USER_ID", "IG_ID")
+    if not token or not ig_user_id:
+        print(f"Skipping IG: token found={bool(token)} ig_user_id found={bool(ig_user_id)}")
+        return False
+    print(f"Publishing to Instagram: {ig_user_id}")
+    container_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media"
+    payload = {"image_url": image_url, "caption": caption, "access_token": token}
+    r = requests.post(container_url, data=payload, timeout=60)
+    print(f"IG Container: {r.status_code} - {r.text[:600]}")
+    if r.status_code != 200:
+        return False
+    creation_id = r.json().get("id")
+    if not creation_id:
+        return False
+    time.sleep(12)
+    publish_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media_publish"
+    r2 = requests.post(publish_url, data={"creation_id": creation_id, "access_token": token}, timeout=60)
+    print(f"IG Publish: {r2.status_code} - {r2.text[:600]}")
+    return r2.status_code == 200
 
-if __name__ == "__main__":
-    import subprocess
-    quote_data, day_num = get_next_quote()
-    print(f"Posting English Day {day_num} at UTC {datetime.datetime.utcnow()}")
-    local_path = create_quote_post(quote_data, day_num)
+def publish_to_facebook(image_url, caption):
+    token = get_env("PAGE_ACCESS_TOKEN", "ACCESS_TOKEN", "FB_ACCESS_TOKEN", "FACEBOOK_TOKEN")
+    page_id = get_env("PAGE_ID", "FB_PAGE_ID", "FACEBOOK_PAGE_ID")
+    if not token or not page_id:
+        print(f"Skipping FB: token found={bool(token)} page_id found={bool(page_id)}")
+        return False
+    print(f"Publishing to Facebook Page: {page_id}")
+    fb_url = f"https://graph.facebook.com/v20.0/{page_id}/photos"
+    payload = {"url": image_url, "caption": caption, "access_token": token}
+    r = requests.post(fb_url, data=payload, timeout=60)
+    print(f"FB Publish: {r.status_code} - {r.text[:600]}")
+    return r.status_code == 200
 
-    # STEP 1: Pehle Git Push karo taaki fallback ready rahe
-    print("Pushing to GitHub first for fallback...")
-    try:
-        subprocess.run(["git","config","--global","user.name","Alfaze Bot"], check=True)
-        subprocess.run(["git","config","--global","user.email","bot@alfaze.com"], check=True)
-        subprocess.run(["git","add", local_path], check=True)
-        subprocess.run(["git","commit","-m",f"Add English Quote Day {day_num}"], check=True)
-        subprocess.run(["git","push"], check=True)
-        print("Git push done")
-    except Exception as e:
-        print(f"Git push failed: {e}")
-
-    # STEP 2: Instant URL try karo
-    image_url = get_instant_url(local_path)
-
-    # STEP 3: Agar instant fail hua to GitHub raw use karo with 40 sec wait
-    if not image_url:
-        print("Using GitHub raw as fallback with 40 sec wait...")
-        time.sleep(40)
-        base = f"https://raw.githubusercontent.com/{REPO}/main/"
-        image_url = base + local_path + f"?v={int(time.time())}"
-
-    print(f"FINAL IMAGE URL FOR POSTING: {image_url}")
-    caption = make_caption(quote_data, day_num)
-    post_to_insta_post(image_url, caption)
-    time.sleep(5)
-    post_to_insta_story(image_url)
-    time.sleep(5)
-    post_to_facebook_page(image_url, caption)
+if __name__=="__main__":
+    entry = get_random_entry()
+    print(f"Selected [{entry['id']}]: {entry['shayari']}")
+    bg = generate_background(entry['background_prompt'])
+    if not bg:
+        exit(1)
+    poster = create_poster(entry, bg)
+    public_url = upload_to_uguu(poster)
+    if not public_url:
+        exit(1)
+    caption = f"{entry['shayari']}\n\n{FOOTER_TEXT}\n\n#goodnight #alfazeulfat #shayari #nightthoughts"
+    print("\n--- Starting Publishing ---")
+    ig_ok = publish_to_instagram(public_url, caption)
+    fb_ok = publish_to_facebook(public_url, caption)
+    print(f"\nResults: IG={'OK' if ig_ok else 'FAIL'} FB={'OK' if fb_ok else 'FAIL'}")
