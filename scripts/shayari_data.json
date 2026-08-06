@@ -1,21 +1,135 @@
 [
-  {"id":17,"text":"Chai ka ek ghunt, aur tumhari kami ka ehsaas,\nHar subah adhoori lagti hai dono ke bina.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":18,"text":"Subah ki pehli chai tumhare naam ki bhi banata hoon,\nTum nahi rehti ho bas khaali kursi rehti hai.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":19,"text":"Subah ki chai thandi ho gayi tumhe sochte-sochte,\nAur hum poori subah barbaad kar baithe tumhe dhoondhte-dhoondhte.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":20,"text":"Subah ki chai ka dhuaan nahi, meri raaton ki thakaan ud rahi hai,\nTumhe yaad karte-karte yah subah bhi adhoori reh gayi.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":21,"text":"Subah-subah chai mein tumhe ghol leta hoon,\nTaaki din bhar tumhare nashe mein dolta rahoon.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":22,"text":"Subah ki chai mein cheeni nahi, tumhari kal ki baatein ghuli hain,\nTabhi to aaj ki subah bhi itni bojhil si hai.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":23,"text":"Har subah chai ke bahane tumhe yaad karta hoon,\nAur yaad karke phir usi subah mein khud ko barbaad karta hoon.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":24,"text":"Subah ki chai kehti hai - use bhool ja,\nDil kehta hai - ek subah aur usi ke naam kar ja.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":25,"text":"Subah ki chai ke saath tumhara khayal aata hai,\nAur aate hi saara din tumhara ho jaata hai.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":26,"text":"Subah ki chai mein tumhari aankhein dikhti hain,\nMain peeta hoon aur wo aankhein mujhe phir se loot leti hain.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":27,"text":"Subah ki chai aur tumhari yaad, dono kadak hain,\nEk honth jalati hai, dusri dil ko jalati hai.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":28,"text":"Subah uthte hi chai nahi, tumhari kami khalti hai,\nChai to bas baad mein aakar us kami ko aag deti hai.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":29,"text":"Har subah chai se poochta hoon - wo lautegi,\nChai chup rehti hai, jaise use bhi pata hai - wo nahi aayegi.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":30,"text":"Subah ki chai mein tumhara gham dooba hai,\nIsiliye to har subah dil bhar aata hai.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":31,"text":"Subah ki chai ke saath tumhe kosta bhi hoon, chahta bhi hoon,\nNafrat mein bhi tumhi ho, mohabbat mein bhi tum hi ho.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":32,"text":"Har subah chai banate hue sochta hoon - aaj nahi yaad karunga,\nAur pehli chuski mein hi tumhe sabse zyada yaad karta hoon.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":33,"text":"Subah ki chai mein tumhari pasand ki elaichi daali hai,\nTum nahi aayi, par khushboo ne kami yaad dila di.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":34,"text":"Subah ki chai ka dhuaan aur tumhari yaadein, dono hawa mein hain,\nEk aankhon mein jalan deti hai, dusri dil mein.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"},
-  {"id":35,"text":"Subah ki chai ke saath tumhara intezaar aadat ban gaya hai,\nAb intezaar bhi ishq ban gaya hai, ibaadat ban gaya hai.","bg_prompt":"foggy railway station bench chai misty morning","hashtags":"#ChaiAurKhayal #AlfazeUlfat #Shayari #MorningVibes"}
+  {
+    "id": 17,
+    "text": "Chai ka ek ghunt, aur tumhari kami ka ehsaas,\nHar subah adhoori lagti hai dono ke bina.",
+    "bg_prompt": "kulhad chai on old open diary with handwritten shayari, warm morning sunlight from window, steam rising, cardamom on page, cozy aesthetic, photorealistic 4k",
+    "hashtags": "#ChaiShayari #MorningDard #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 18,
+    "text": "Subah ki pehli chai tumhare naam ki bhi banata hoon,\nTum nahi rehti ho bas khaali kursi rehti hai.",
+    "bg_prompt": "empty wooden chair near window with one kulhad chai on small table, soft morning bokeh light, lonely aesthetic, diary on chair",
+    "hashtags": "#SubahKiChai #TanhaiShayari #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 19,
+    "text": "Subah ki chai thandi ho gayi tumhe sochte-sochte,\nAur hum poori subah barbaad kar baithe tumhe dhoondhte-dhoondhte.",
+    "bg_prompt": "kulhad chai gone cold on diary, no steam, cold morning light on wooden table, melancholic mood",
+    "hashtags": "#ChaiAurYaadein #DardBhara #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 20,
+    "text": "Subah ki chai ka dhuaan nahi, meri raaton ki thakaan ud rahi hai,\nTumhe yaad karte-karte yah subah bhi adhoori reh gayi.",
+    "bg_prompt": "kulhad chai steam closeup in slow motion, dark morning window light, poetic moody, book in blur",
+    "hashtags": "#RaatonKiThakan #AdhuriSubah #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 21,
+    "text": "Subah-subah chai mein tumhe ghol leta hoon,\nTaaki din bhar tumhare nashe mein dolta rahoon.",
+    "bg_prompt": "pouring chai from steel kettle into kulhad on old book, elaichi and cloves around, warm kitchen sunlight",
+    "hashtags": "#IshqWaliChai #ChaiNasha #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 22,
+    "text": "Subah ki chai mein cheeni nahi, tumhari kal ki baatein ghuli hain,\nTabhi to aaj ki subah bhi itni bojhil si hai.",
+    "bg_prompt": "stirring chai with small spoon in kulhad, diary with yesterday date visible, warm light, heavy mood",
+    "hashtags": "#KalKiBaatein #BojhilSubah #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 23,
+    "text": "Har subah chai ke bahane tumhe yaad karta hoon,\nAur yaad karke phir usi subah mein khud ko barbaad karta hoon.",
+    "bg_prompt": "two kulhad chai on rustic wooden table, one empty one full, dried flowers and open diary, bokeh morning light",
+    "hashtags": "#ChaiBahana #YaadShayari #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 24,
+    "text": "Subah ki chai kehti hai - use bhool ja,\nDil kehta hai - ek subah aur usi ke naam kar ja.",
+    "bg_prompt": "kulhad chai with heart shaped steam on love letter diary, warm golden hour morning light",
+    "hashtags": "#DilKiBaatein #IshqAurChai #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 25,
+    "text": "Subah ki chai ke saath tumhara khayal aata hai,\nAur aate hi saara din tumhara ho jaata hai.",
+    "bg_prompt": "morning window light on kulhad chai and open diary with faded photo, nostalgic cozy aesthetic",
+    "hashtags": "#TumharaKhayal #PooraDinTumhara #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 26,
+    "text": "Subah ki chai mein tumhari aankhein dikhti hain,\nMain peeta hoon aur wo aankhein mujhe phir se loot leti hain.",
+    "bg_prompt": "reflection of eyes in kulhad chai surface, closeup macro, diary in background blur, romantic",
+    "hashtags": "#Aankhein #ChaiMeIshq #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 27,
+    "text": "Subah ki chai aur tumhari yaad, dono kadak hain,\nEk honth jalati hai, dusri dil ko jalati hai.",
+    "bg_prompt": "extra kadak dark chai in kulhad with strong steam, wooden table, diary with burnt edges, intense mood",
+    "hashtags": "#KadakChai #KadakYaad #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 28,
+    "text": "Subah uthte hi chai nahi, tumhari kami khalti hai,\nChai to bas baad mein aakar us kami ko aag deti hai.",
+    "bg_prompt": "empty bed side table with kulhad chai and alarm clock 6am, morning light, lonely room",
+    "hashtags": "#TumhariKami #SubahKaDard #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 29,
+    "text": "Har subah chai se poochta hoon - wo lautegi,\nChai chup rehti hai, jaise use bhi pata hai - wo nahi aayegi.",
+    "bg_prompt": "kulhad chai with question mark made from elaichi seeds beside it on diary, silent morning mood",
+    "hashtags": "#WoLautegi #KhamoshChai #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 30,
+    "text": "Subah ki chai mein tumhara gham dooba hai,\nIsiliye to har subah dil bhar aata hai.",
+    "bg_prompt": "kulhad chai top view with gham word faintly in diary ink bleeding, moody morning",
+    "hashtags": "#GhamWaliChai #DilBharAataHai #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 31,
+    "text": "Subah ki chai ke saath tumhe kosta bhi hoon, chahta bhi hoon,\nNafrat mein bhi tumhi ho, mohabbat mein bhi tum hi ho.",
+    "bg_prompt": "two hands holding one kulhad chai, diary with cut pages, warm dramatic light, conflict love",
+    "hashtags": "#NafratAurMohabbat #UlajhChai #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 32,
+    "text": "Har subah chai banate hue sochta hoon - aaj nahi yaad karunga,\nAur pehli chuski mein hi tumhe sabse zyada yaad karta hoon.",
+    "bg_prompt": "making chai early morning in kitchen, steam on face, thinking pose, open diary nearby, cozy realistic",
+    "hashtags": "#PehliChuski #YaadAagayi #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 33,
+    "text": "Subah ki chai mein tumhari pasand ki elaichi daali hai,\nTum nahi aayi, par khushboo ne kami yaad dila di.",
+    "bg_prompt": "kulhad chai closeup with 2 green elaichi on open diary with handwritten shayari visible, warm morning sun",
+    "hashtags": "#ElaichiKiKhushboo #Pasand #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 34,
+    "text": "Subah ki chai ka dhuaan aur tumhari yaadein, dono hawa mein hain,\nEk aankhon mein jalan deti hai, dusri dil mein.",
+    "bg_prompt": "chai steam rising mixed with floating old letters in air, window light rays, poetic blur, emotional",
+    "hashtags": "#DhuaanAurYaadein #DilMeJalan #AlfazeUlfat",
+    "template": "manual_day15"
+  },
+  {
+    "id": 35,
+    "text": "Subah ki chai ke saath tumhara intezaar aadat ban gaya hai,\nAb intezaar bhi ishq ban gaya hai, ibaadat ban gaya hai.",
+    "bg_prompt": "kulhad chai on balcony at sunrise, empty second chair, waiting shadow, diary with 365 days mark",
+    "hashtags": "#IntezaarIshqHai #Ibaadat #AlfazeUlfat",
+    "template": "manual_day15"
+  }
 ]
