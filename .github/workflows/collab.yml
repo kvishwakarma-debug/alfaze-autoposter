@@ -1,0 +1,34 @@
+name: Collab Finder Daily
+
+on:
+  schedule:
+    # Roz subah 10:00 AM IST = 04:30 UTC
+    - cron: '30 4 * * *'
+  workflow_dispatch: # Manual run ka button
+
+jobs:
+  find-collabs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Run Collab Finder
+        run: |
+          python collab/collab_finder.py
+          cat collab/data/collab_today.json
+
+      - name: Commit Today's List
+        run: |
+          git config --global user.name "Alfaz Bot"
+          git config --global user.email "bot@alfaze.ulfat"
+          git add collab/data/collab_today.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Daily collab - $(date +'%d-%m-%Y')"
+          git push
