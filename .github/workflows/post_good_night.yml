@@ -2,7 +2,7 @@ name: Post Good Night Shayari
 
 on:
   schedule:
-    - cron: '30 16 * * *'  # 10:00 PM IST = 4:30 PM UTC
+    - cron: '30 16 * * *'  # 10:00 PM IST
   workflow_dispatch:
 
 jobs:
@@ -22,7 +22,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y fonts-noto-core fonts-noto-cjk
-          fc-list | grep -i Devanagari
 
       - name: Install dependencies
         run: |
@@ -35,8 +34,8 @@ jobs:
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }}
-          FACEBOOK_TOKEN: ${{ secrets.FACEBOOK_TOKEN }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          FACEBOOK_TOKEN: ${{ secrets.FACEBOOK_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
