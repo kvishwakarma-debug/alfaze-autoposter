@@ -1,6 +1,7 @@
 """
 Good Night Auto Poster - Alfaze Ulfat - FINAL WITH PUBLISHING
 Location: scripts/post_good_night.py
+JSON: scripts/good_night_shayari_with_backgrounds.json
 """
 
 import json, random, os, requests, time
@@ -20,6 +21,14 @@ FONT_CANDIDATES = [
     "/usr/share/fonts/truetype/noto/NotoSerifDevanagari-Medium.ttf",
     "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf",
 ]
+
+def get_env(*names):
+    for n in names:
+        v = os.environ.get(n)
+        if v:
+            print(f"Found env {n} -> {v[:10]}...")
+            return v
+    return None
 
 def get_font(size):
     for path in FONT_CANDIDATES:
@@ -97,8 +106,7 @@ def upload_to_uguu(p):
     try:
         r = requests.post("https://uguu.se/upload.php", files={"files[]": open(p,'rb')}, timeout=60)
         if r.status_code==200:
-            j = r.json()
-            url = j['files'][0]['url']
+            url = r.json()['files'][0]['url']
             print(f"uguu URL: {url}")
             return url
         print(f"uguu failed: {r.text[:200]}")
@@ -107,81 +115,53 @@ def upload_to_uguu(p):
     return None
 
 def publish_to_instagram(image_url, caption):
-    """Graph API v20.0 - same fix as English quotes"""
-    token = os.environ.get("ACCESS_TOKEN")
-    ig_user_id = os.environ.get("IG_USER_ID")
+    token = get_env("ACCESS_TOKEN", "FB_ACCESS_TOKEN", "IG_ACCESS_TOKEN", "FACEBOOK_TOKEN", "TOKEN")
+    ig_user_id = get_env("IG_USER_ID", "INSTAGRAM_USER_ID", "IG_ID")
     if not token or not ig_user_id:
-        print("Skipping IG: ACCESS_TOKEN or IG_USER_ID not set")
+        print("Skipping IG: Token or IG User ID not set. Available envs:", [k for k in os.environ.keys() if 'TOKEN' in k or 'IG_' in k or 'ACCESS' in k])
         return False
-    
     print(f"Publishing to Instagram: {ig_user_id}")
-    # Step 1: Create container
     container_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media"
-    payload = {
-        "image_url": image_url,
-        "caption": caption,
-        "access_token": token
-    }
+    payload = {"image_url": image_url, "caption": caption, "access_token": token}
     r = requests.post(container_url, data=payload, timeout=60)
-    print(f"IG Container Response: {r.status_code} - {r.text[:500]}")
+    print(f"IG Container: {r.status_code} - {r.text[:500]}")
     if r.status_code != 200:
         return False
-    
     creation_id = r.json().get("id")
     if not creation_id:
         return False
-    
-    # Wait for processing
-    time.sleep(10)
-    
-    # Step 2: Publish
+    time.sleep(12)
     publish_url = f"https://graph.facebook.com/v20.0/{ig_user_id}/media_publish"
-    payload2 = {
-        "creation_id": creation_id,
-        "access_token": token
-    }
-    r2 = requests.post(publish_url, data=payload2, timeout=60)
-    print(f"IG Publish Response: {r2.status_code} - {r2.text[:500]}")
+    r2 = requests.post(publish_url, data={"creation_id": creation_id, "access_token": token}, timeout=60)
+    print(f"IG Publish: {r2.status_code} - {r2.text[:500]}")
     return r2.status_code == 200
 
 def publish_to_facebook(image_url, caption):
-    token = os.environ.get("ACCESS_TOKEN")
-    page_id = os.environ.get("FB_PAGE_ID")
+    token = get_env("ACCESS_TOKEN", "FB_ACCESS_TOKEN", "FACEBOOK_TOKEN")
+    page_id = get_env("FB_PAGE_ID", "FACEBOOK_PAGE_ID", "PAGE_ID")
     if not token or not page_id:
-        print("Skipping FB: ACCESS_TOKEN or FB_PAGE_ID not set")
+        print("Skipping FB: Token or Page ID not set.")
         return False
-    
     print(f"Publishing to Facebook Page: {page_id}")
     fb_url = f"https://graph.facebook.com/v20.0/{page_id}/photos"
-    payload = {
-        "url": image_url,
-        "caption": caption,
-        "access_token": token
-    }
+    payload = {"url": image_url, "caption": caption, "access_token": token}
     r = requests.post(fb_url, data=payload, timeout=60)
-    print(f"FB Publish Response: {r.status_code} - {r.text[:500]}")
+    print(f"FB Publish: {r.status_code} - {r.text[:500]}")
     return r.status_code == 200
 
 if __name__=="__main__":
     entry = get_random_entry()
     print(f"Selected [{entry['id']}]: {entry['shayari']}")
-    
     bg = generate_background(entry['background_prompt'])
     if not bg:
         exit(1)
-    
     poster = create_poster(entry, bg)
     public_url = upload_to_uguu(poster)
-    
     if not public_url:
-        print("Failed to get public URL, cannot publish")
         exit(1)
-    
-    caption = f"{entry['shayari']}\n\n{FOOTER_TEXT}\n\n#goodnight #nightthoughts #alfazeulfat #shayari #hindishayari #raat #sukoon"
-    
+    caption = f"{entry['shayari']}\n\n{FOOTER_TEXT}\n\n#goodnight #alfazeulfat #shayari"
     print("\n--- Starting Publishing ---")
     ig_ok = publish_to_instagram(public_url, caption)
     fb_ok = publish_to_facebook(public_url, caption)
-    
     print(f"\nResults: IG={'OK' if ig_ok else 'FAIL'} FB={'OK' if fb_ok else 'FAIL'}")
     print(f"Done: {poster} -> {public_url}")
