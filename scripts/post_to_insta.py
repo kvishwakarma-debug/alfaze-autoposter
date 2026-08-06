@@ -7,7 +7,7 @@ from publishers.youtube_music import ensure_music_for_shayari
 from publishers.story_publisher import post_to_story
 from publishers.facebook_publisher import post_to_fb_reel
 import requests, time, subprocess, urllib.parse, datetime
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 try:
     from moviepy.editor import ImageClip, AudioFileClip
 except ModuleNotFoundError:
@@ -55,13 +55,15 @@ def wrap_text_smart(text, width=30):
 
 def create_chai_post(shayari_data, day_num):
     text_for_image = shayari_data.get('text', '')
-    prompt = shayari_data.get("bg_prompt", "foggy railway station bench chai misty morning")
-    encoded = urllib.parse.quote(prompt + ", photorealistic, 8k, moody, no text")
+    prompt = shayari_data.get("bg_prompt", "kulhad chai on old open diary with handwritten shayari, warm morning sunlight")
+    encoded = urllib.parse.quote(prompt + ", photorealistic, 8k, moody, no text, ultra detailed")
     bg_url = f"https://image.pollinations.ai/prompt/{encoded}?width=1080&height=1920&nologo=true&seed={day_num}&enhance=true"
     print(f"BG Gen Day {day_num}")
     r = requests.get(bg_url, timeout=120)
     open("bg.jpg","wb").write(r.content)
-    full_img = Image.open("bg.jpg").convert("RGB").resize((1080,1920), Image.LANCZOS)
+    # FIX 1: Stretch fix - fit se crop hoga, khichega nahi (manual quality)
+    bg_temp = Image.open("bg.jpg").convert("RGB")
+    full_img = ImageOps.fit(bg_temp, (1080, 1920), method=Image.LANCZOS, centering=(0.5, 0.5))
     draw = ImageDraw.Draw(full_img, "RGBA")
     try:
         font_bold = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 40)
@@ -111,7 +113,7 @@ def image_to_reel_with_music(image_path, day_num, shayari_data):
                     else:
                         start = random.uniform(0, max(0, audio.duration-7))
                         audio = audio.subclip(start, start+7)
-                    audio = audio.volumex(0.55) # VOLUME KAM - SAD KE LIYE PERFECT
+                    audio = audio.volumex(0.55)
                     clip = clip.set_audio(audio)
                     print(f"Audio mixed vol 0.55: {music_path}")
                 except Exception as e:
