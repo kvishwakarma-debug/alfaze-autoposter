@@ -1,6 +1,8 @@
+# collab/collab_finder.py
+# Ye file roz subah 10 AM pe GitHub Action se auto chalegi
+# Koi token ki zarurat nahi is file me
 
-# collab/collab_finder.py - SAFE Collab Partner Finder
-import json, os, random
+import json, os, random, requests
 from datetime import datetime, timezone, timedelta
 
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -29,25 +31,36 @@ Dono ki reach 2x hogi, Insta collab ko push karta hai.
 
 Interested ho to bolo, invite bhej du?"""
 
+def send_telegram(msg):
+    # TOKEN YAHAN HARDCODE MAT KARNA!
+    # Ye 2 values GitHub Secrets se aayengi -> .yml file me set hai
+    token = os.getenv("TELEGRAM_TOKEN")  # <-- Yahan se token aayega (GitHub Secret)
+    chat_id = os.getenv("TELEGRAM_CHATID")  # <-- Yahan se Chat ID aayega (GitHub Secret)
+    
+    if not token or not chat_id:
+        print("⚠️ Telegram Token/ChatID nahi mila - local run hai, skip")
+        return
+    
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    try:
+        requests.post(url, json={"chat_id": chat_id, "text": msg})
+        print("✅ Telegram pe bhej diya!")
+    except Exception as e:
+        print(f"❌ Telegram error: {e}")
+
 def main():
     os.makedirs("collab/data", exist_ok=True)
     now_ist = datetime.now(IST)
-    
     today = random.sample(SEED_PAGES, 5)
     
-    output = {
-        "date": now_ist.strftime("%d-%m-%Y %I:%M %p IST"),
-        "targets": []
-    }
+    output = {"date": now_ist.strftime("%d-%m-%Y %I:%M %p IST"), "targets": []}
+    tg_message = f"🤝 Aaj ke 5 Collab Targets - {output['date']}\n\n"
     
     print(f"=== Collab Hunt - {output['date']} ===\n")
     
     for i, p in enumerate(today, 1):
         dm = generate_dm(p, random.randint(52, 70))
-        print(f"{i}. @{p['username']} ({p['followers']} - {p['niche']})")
-        print(f"   https://instagram.com/{p['username']}")
-        print(f"   DM:\n{dm}\n")
-        print("-"*60)
+        print(f"{i}. @{p['username']} ({p['followers']})")
         
         output["targets"].append({
             "username": p["username"],
@@ -55,15 +68,24 @@ def main():
             "followers": p["followers"],
             "niche": p["niche"],
             "dm": dm,
-            "status": "pending"
+            "status": "pending"  # <-- auto status, baad me tu manual change karega
         })
+        
+        # Telegram ke liye message banao
+        tg_message += f"{i}. @{p['username']} ({p['followers']} - {p['niche']})\n"
+        tg_message += f"Link: https://instagram.com/{p['username']}\n"
+        tg_message += f"DM: {dm}\n\n---\n\n"
     
-    # Save for tracking
+    tg_message += "👉 1-1 ghante ke gap pe DM karo, 5 ek saath mat bhejo!"
+    
+    # 1. JSON save karo (git ke liye)
     with open("collab/data/collab_today.json", "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
     
-    print("\n✅ Saved to collab/data/collab_today.json")
-    print("⚠️ MANUAL DM only - Bot se mat bhejo, 5/day max")
+    # 2. Telegram bhejo
+    send_telegram(tg_message)
+    
+    print("\n✅ Saved + Telegram Done")
 
 if __name__ == "__main__":
     main()
