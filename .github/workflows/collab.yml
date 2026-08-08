@@ -1,31 +1,26 @@
-name: Collab Finder Daily
-
+name: Daily Collab Queue
 on:
   schedule:
-    - cron: '30 4 * * *'
+    - cron: '0 3 * * *' # Roz subah 8:30 IST
   workflow_dispatch:
 
 jobs:
-  find-collabs:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - name: Install requests
-        run: pip install requests
-      - name: Run Finder and Telegram
+      - run: pip install -r requirements.txt
+      - run: python collab/collab_finder.py
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHATID: ${{ secrets.TELEGRAM_CHATID }}
-        run: python collab/collab_finder.py
-      - name: Commit Daily List
-        run: |
-          git config --global user.name "Alfaz Bot"
-          git config --global user.email "bot@alfaze.ulfat"
-          git pull --rebase origin main
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+      - run: |
+          git config --global user.name "collab-bot"
+          git config --global user.email "bot@alfaze.com"
           git add collab/data/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "daily collab" && git push)
+          git commit -m "daily queue update" || exit 0
+          git push
