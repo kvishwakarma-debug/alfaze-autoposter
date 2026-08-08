@@ -1,8 +1,6 @@
-import json
-import os
-import random
-import requests
+import json, os, random, requests, gspread
 from datetime import datetime, timezone, timedelta
+from google.oauth2.service_account import Credentials
 
 IST = timezone(timedelta(hours=5, minutes=30))
 
@@ -19,56 +17,46 @@ SEED_PAGES = [
     {"username": "broken.hearts.quotes", "followers": "41k", "niche": "Breakup"},
 ]
 
-def generate_dm(partner, day=55):
-    return f"""Hi @{partner['username']} 👋
-
-Aapka {partner['niche']} wala page dekha, kaafi genuine laga! 👌
-Mai @alfaze.ulfat chalata hu - 100 Days Deep Quotes + Chai Shayari.
-
-Kya hum week me 1 collab post karein? Day {day} ka quote ready hai.
-Dono ki reach 2x hogi, Insta collab ko push karta hai.
-
-Interested ho to bolo, invite bhej du?"""
-
-def send_telegram(msg):
-    token = os.getenv("TELEGRAM_TOKEN")
-    chat_id = os.getenv("TELEGRAM_CHATID")
-    if not token or not chat_id:
-        print("Telegram secrets missing, skipping")
-        return
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    try:
-        requests.post(url, json={"chat_id": chat_id, "text": msg})
-        print("Telegram sent")
-    except Exception as e:
-        print(f"Telegram error {e}")
+def get_sheet():
+    creds_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
+    if not creds_json: return None
+    creds_dict = json.loads(creds_json)
+    scopes = ["https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive"]
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+    client = gspread.authorize(creds)
+    return client.open("Alfaz Collab Tracker").sheet1
 
 def main():
     os.makedirs("collab/data", exist_ok=True)
     now_ist = datetime.now(IST)
-    today = random.sample(SEED_PAGES, 5)
-    
-    output = {"date": now_ist.strftime("%d-%m-%Y %I:%M %p IST"), "targets": []}
-    tg_message = f"🤝 Aaj ke 5 Collab Targets - {output['date']}\n\n"
-    
-    for i, p in enumerate(today, 1):
-        dm = generate_dm(p, random.randint(52, 70))
-        output["targets"].append({
-            "username": p["username"],
-            "url": f"https://instagram.com/{p['username']}",
-            "followers": p["followers"],
-            "niche": p["niche"],
-            "dm": dm,
-            "status": "pending"
-        })
-        tg_message += f"{i}. @{p['username']} ({p['followers']} - {p['niche']})\nLink: https://instagram.com/{p['username']}\nDM: {dm}\n\n---\n\n"
-    
-    tg_message += "Note: 1-1 ghante gap pe DM karo"
-    
-    with open("collab/data/collab_today.json", "w", encoding="utf-8") as f:
-        json.dump(output, f, indent=2, ensure_ascii=False)
-    
-    send_telegram(tg_message)
+    sheet = get_sheet()
+
+    done_usernames = set()
+    if sheet:
+        try:
+            records = sheet.get_all_records()
+            done_usernames = {r['Username'] for r in records if r['Username']}
+        except: pass
+
+    available = [p for p in SEED_PAGES if p['username'] not in done_usernames]
+    if len(available) < 5: available = SEED_PAGES
+
+    today_targets = random.sample(available, 5)
+
+    with open("collab/data/queue.json", "w", encoding="utf-8") as f:
+        json.dump(today_targets, f, indent=2, ensure_ascii=False)
+
+    if sheet:
+        for p in today_targets:
+            row = [now_ist.strftime("%d-%m-%Y %I:%M %p IST"), p['username'], p['followers'], p['niche'], f"https://instagram.com/{p['username']}", "", "pending", ""]
+            try: sheet.append_row(row)
+            except Exception as e: print(e)
+
+    token = os.getenv("TELEGRAM_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHATID")
+    if token and chat_id:
+        msg = f"✅ Queue + Sheet Ready - {now_ist.strftime('%d-%m-%Y')}\nTargets: {', '.join(['@'+p['username'] for p in today_targets])}\n/next likho bot me."
+        requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={"chat_id": chat_id, "text": msg})
 
 if __name__ == "__main__":
     main()
