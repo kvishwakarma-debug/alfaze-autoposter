@@ -1,18 +1,13 @@
 [
   {
-    "username": "alfaz_e_dil",
-    "followers": "32k",
-    "niche": "Dard Shayari"
-  },
-  {
-    "username": "sukoon_e_alfaz",
-    "followers": "37k",
-    "niche": "Sukoon Shayari"
-  },
-  {
     "username": "deep.lines",
     "followers": "91k",
     "niche": "Deep Quotes"
+  },
+  {
+    "username": "alfaz_e_dil",
+    "followers": "32k",
+    "niche": "Dard Shayari"
   },
   {
     "username": "hindi.shayari.quotes",
@@ -23,5 +18,10 @@
     "username": "shayari.quotes.love",
     "followers": "45k",
     "niche": "Love Shayari"
+  },
+  {
+    "username": "urdupoetry.lovers",
+    "followers": "78k",
+    "niche": "Urdu Poetry"
   }
 ]
