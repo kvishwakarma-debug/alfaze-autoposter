@@ -1,4 +1,4 @@
-// Helper to get API Key from Storage
+// Storage se API Key fetch karne ka helper
 function getApiKey() {
     return new Promise((resolve) => {
         chrome.storage.local.get(['gemini_key'], (result) => {
@@ -7,11 +7,10 @@ function getApiKey() {
     });
 }
 
-// Typing simulator for both Input / Textarea and Custom Divs
-async function typeText(element, text) {
+// Text insertion for Instagram Inputs
+async function insertCommentText(element, text) {
     element.focus();
 
-    // Strategy 1: Regular Form Controls (textarea / input)
     if (element.tagName === 'TEXTAREA' || element.tagName === 'INPUT') {
         element.value = text;
         element.dispatchEvent(new Event('input', { bubbles: true }));
@@ -19,13 +18,10 @@ async function typeText(element, text) {
         return;
     }
 
-    // Strategy 2: Contenteditable Divs / Custom Editors (Instagram Web Default)
+    // Instagram contenteditable elements (div/span/p)
     try {
-        // Clear existing text if any
+        element.focus();
         document.execCommand('selectAll', false, null);
-        document.execCommand('delete', false, null);
-
-        // Insert new text
         document.execCommand('insertText', false, text);
         element.dispatchEvent(new Event('input', { bubbles: true }));
     } catch (e) {
@@ -54,49 +50,59 @@ async function generateComment(captionText, apiKey) {
     }
 }
 
-// Universal Input Finder
-function getTargetElement() {
-    // 1. Direct active element check (Jiss jagah cursor blink kar raha hai)
+// Multi-selector Instagram Input Finder
+function findInstagramCommentInput() {
+    // Priority 1: Currently focused element
     const active = document.activeElement;
-    if (active && active !== document.body && active.tagName !== 'HTML') {
+    if (active && active !== document.body && (
+        active.tagName === 'TEXTAREA' || 
+        active.getAttribute('contenteditable') === 'true' ||
+        active.getAttribute('role') === 'textbox'
+    )) {
         return active;
     }
 
-    // 2. Query all editable inputs on page
+    // Priority 2: Instagram web elements
     const selectors = [
-        'form textarea',
-        'form div[contenteditable="true"]',
-        'div[contenteditable="true"]',
         'textarea',
+        'div[contenteditable="true"]',
+        'p[contenteditable="true"]',
+        '[aria-label*="comment" i]',
+        '[aria-label*="Comment" i]',
+        '[placeholder*="comment" i]',
         '[role="textbox"]'
     ];
 
     for (let s of selectors) {
-        const el = document.querySelector(s);
-        if (el) return el;
+        const elements = document.querySelectorAll(s);
+        for (let el of elements) {
+            // Check if element is visible on screen
+            if (el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0) {
+                return el;
+            }
+        }
     }
-
     return null;
 }
 
-// Keyboard listener
+// Shortcut Handler
 document.addEventListener('keydown', async (e) => {
     if (e.altKey && (e.key === 'c' || e.key === 'C')) {
         e.preventDefault();
 
         const apiKey = await getApiKey();
         if (!apiKey) {
-            alert("Pehle Extension Icon par click karke Gemini API Key Save karein!");
+            console.warn("⚠️ Gemini API Key missing in Extension popup!");
             return;
         }
 
-        const targetEl = getTargetElement();
-        if (!targetEl) {
-            alert("Comment box pe pehle ek baar mouse se click kar lein taaki cursor active ho jaye!");
+        const commentBox = findInstagramCommentInput();
+        if (!commentBox) {
+            console.warn("⚠️ Comment box not found on page yet.");
             return;
         }
 
-        // Caption fetch logic
+        // Caption fetch
         let caption = "";
         const spanElements = document.querySelectorAll('h1, span, p');
         for (let el of spanElements) {
@@ -106,10 +112,10 @@ document.addEventListener('keydown', async (e) => {
             }
         }
 
-        console.log("Generating comment...");
+        console.log("🚀 Generating comment...");
         const commentText = await generateComment(caption, apiKey);
         
-        await typeText(targetEl, commentText);
-        console.log("✅ Comment inserted successfully!");
+        await insertCommentText(commentBox, commentText);
+        console.log("✅ Comment inserted:", commentText);
     }
 });
