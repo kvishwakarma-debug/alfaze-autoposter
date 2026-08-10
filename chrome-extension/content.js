@@ -1,4 +1,4 @@
-// Storage se API Key fetch karne ka helper
+// Helper to get API Key from Storage
 function getApiKey() {
     return new Promise((resolve) => {
         chrome.storage.local.get(['gemini_key'], (result) => {
@@ -7,38 +7,36 @@ function getApiKey() {
     });
 }
 
-// Human-like Typing Simulator
-const getRandomDelay = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-async function typeHumanLike(element, text) {
+// Typing simulator for both Input / Textarea and Custom Divs
+async function typeText(element, text) {
     element.focus();
-    
-    // Non-textarea elements (div / p / span editable content)
-    if (element.tagName.toLowerCase() !== 'textarea') {
-        element.focus();
-        document.execCommand('selectAll', false, null);
-        document.execCommand('insertText', false, text);
+
+    // Strategy 1: Regular Form Controls (textarea / input)
+    if (element.tagName === 'TEXTAREA' || element.tagName === 'INPUT') {
+        element.value = text;
         element.dispatchEvent(new Event('input', { bubbles: true }));
         element.dispatchEvent(new Event('change', { bubbles: true }));
         return;
     }
 
-    // Standard Textarea elements
-    element.value = '';
-    for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        element.dispatchEvent(new KeyboardEvent('keydown', { key: char, bubbles: true }));
-        document.execCommand('insertText', false, char);
-        element.dispatchEvent(new KeyboardEvent('keyup', { key: char, bubbles: true }));
-        await new Promise(r => setTimeout(r, getRandomDelay(20, 60)));
+    // Strategy 2: Contenteditable Divs / Custom Editors (Instagram Web Default)
+    try {
+        // Clear existing text if any
+        document.execCommand('selectAll', false, null);
+        document.execCommand('delete', false, null);
+
+        // Insert new text
+        document.execCommand('insertText', false, text);
+        element.dispatchEvent(new Event('input', { bubbles: true }));
+    } catch (e) {
+        element.innerText = text;
+        element.dispatchEvent(new Event('input', { bubbles: true }));
     }
-    element.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 // Gemini API Call
 async function generateComment(captionText, apiKey) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    
     const prompt = `Aap ek Instagram engagement expert hain. Niche di gayi reel caption ko padhein aur ek bahut hi pyara, positive, short aur aesthetic Hinglish comment likhein (1-2 lines with relevant emojis). No quotation marks.
     Caption: ${captionText || "General creative post"}`;
 
@@ -46,9 +44,7 @@ async function generateComment(captionText, apiKey) {
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-            })
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
         const data = await response.json();
         return data.candidates[0].content.parts[0].text.trim();
@@ -58,63 +54,49 @@ async function generateComment(captionText, apiKey) {
     }
 }
 
-// Smart Comment Box Finder Strategy
-function findCommentBox() {
-    const activeEl = document.activeElement;
-    
-    // Strategy 1: Agar user ne pehle se hi kisi typing area par click kar rakha hai
-    if (activeEl && (
-        activeEl.tagName === 'TEXTAREA' || 
-        activeEl.getAttribute('contenteditable') === 'true' ||
-        activeEl.tagName === 'P' || 
-        activeEl.getAttribute('role') === 'textbox'
-    )) {
-        return activeEl;
+// Universal Input Finder
+function getTargetElement() {
+    // 1. Direct active element check (Jiss jagah cursor blink kar raha hai)
+    const active = document.activeElement;
+    if (active && active !== document.body && active.tagName !== 'HTML') {
+        return active;
     }
 
-    // Strategy 2: Instagram Specific Input Selectors
+    // 2. Query all editable inputs on page
     const selectors = [
-        'textarea',
+        'form textarea',
+        'form div[contenteditable="true"]',
         'div[contenteditable="true"]',
-        'p[contenteditable="true"]',
-        '[aria-label*="Add a comment"]',
-        '[aria-label*="comment"]',
-        '[placeholder*="Add a comment"]',
+        'textarea',
         '[role="textbox"]'
     ];
 
-    for (let selector of selectors) {
-        const elements = document.querySelectorAll(selector);
-        for (let el of elements) {
-            // Visible aur clickable elements filter out karein
-            if (el.offsetWidth > 0 && el.offsetHeight > 0) {
-                return el;
-            }
-        }
+    for (let s of selectors) {
+        const el = document.querySelector(s);
+        if (el) return el;
     }
+
     return null;
 }
 
-// Key Shortcut Listener: Press Alt + C
+// Keyboard listener
 document.addEventListener('keydown', async (e) => {
     if (e.altKey && (e.key === 'c' || e.key === 'C')) {
         e.preventDefault();
-        
+
         const apiKey = await getApiKey();
         if (!apiKey) {
-            alert("Pehle Extension Icon par click karke apni Gemini API Key Save karein!");
+            alert("Pehle Extension Icon par click karke Gemini API Key Save karein!");
             return;
         }
 
-        console.log("⚡ Auto-Comment Triggered...");
-
-        const commentBox = findCommentBox();
-        if (!commentBox) {
-            alert("Comment box detect nahi hua. Kripya pehle comment input area par click karke typing cursor activate karein!");
+        const targetEl = getTargetElement();
+        if (!targetEl) {
+            alert("Comment box pe pehle ek baar mouse se click kar lein taaki cursor active ho jaye!");
             return;
         }
 
-        // Caption extraction
+        // Caption fetch logic
         let caption = "";
         const spanElements = document.querySelectorAll('h1, span, p');
         for (let el of spanElements) {
@@ -124,13 +106,10 @@ document.addEventListener('keydown', async (e) => {
             }
         }
 
-        console.log("Caption extracted:", caption);
-        
-        // Disable temporarily while typing
+        console.log("Generating comment...");
         const commentText = await generateComment(caption, apiKey);
-        console.log("Generated Comment:", commentText);
-
-        await typeHumanLike(commentBox, commentText);
-        console.log("✅ Comment Typed Successfully!");
+        
+        await typeText(targetEl, commentText);
+        console.log("✅ Comment inserted successfully!");
     }
 });
