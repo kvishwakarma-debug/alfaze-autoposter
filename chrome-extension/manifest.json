@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Instagram AI Comment Assistant",
+  "name": "Insta AI Comment Assistant",
   "version": "1.0",
   "description": "Generate AI comments on Instagram posts and reels",
   "permissions": [
@@ -8,8 +8,7 @@
     "activeTab"
   ],
   "host_permissions": [
-    "https://*.instagram.com/*",
-    "https://generativelanguage.googleapis.com/*"
+    "<all_urls>"
   ],
   "action": {
     "default_popup": "popup.html"
@@ -20,8 +19,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.instagram.com/*",
-        "https://instagram.com/*"
+        "<all_urls>"
       ],
       "js": ["content.js"],
       "run_at": "document_end"
