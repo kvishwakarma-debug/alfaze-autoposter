@@ -1,48 +1,126 @@
-// Background Worker: Messages listen karega
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "GENERATE_COMMENT") {
-        chrome.storage.local.get(['gemini_key'], async (result) => {
-            const apiKey = result.gemini_key ? result.gemini_key.trim() : null;
-            
-            if (!apiKey) {
-                sendResponse({ success: false, error: "NO_KEY" });
+console.log("Insta AI Script Injected & Ready v6.0");
+
+function showStatus(text, isError = false) {
+    let badge = document.getElementById('insta-ai-badge');
+    if (!badge) {
+        badge = document.createElement('div');
+        badge.id = 'insta-ai-badge';
+        badge.style.cssText = 'position:fixed; bottom:20px; right:20px; padding:12px 18px; border-radius:8px; z-index:99999999; font-family:sans-serif; font-size:13px; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.3); transition:all 0.3s;';
+        document.body.appendChild(badge);
+    }
+    badge.style.backgroundColor = isError ? '#DC2626' : '#059669';
+    badge.style.color = '#FFFFFF';
+    badge.innerText = text;
+    badge.style.display = 'block';
+
+    setTimeout(() => { if (badge) badge.style.display = 'none'; }, 4000);
+}
+
+function findTargetInput() {
+    const active = document.activeElement;
+    if (active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT' || active.isContentEditable || active.getAttribute('role') === 'textbox')) {
+        return active;
+    }
+    return document.querySelector('textarea') || 
+           document.querySelector('div[contenteditable="true"]') || 
+           document.querySelector('div[role="textbox"]');
+}
+
+function writeText(target, text) {
+    target.focus();
+    if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
+        const start = target.selectionStart || 0;
+        const end = target.selectionEnd || 0;
+        target.value = target.value.substring(0, start) + text + target.value.substring(end);
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+        target.dispatchEvent(new Event('change', { bubbles: true }));
+        return;
+    }
+    try {
+        document.execCommand('insertText', false, text);
+    } catch (e) {
+        target.innerText = text;
+    }
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function generateCommentAction() {
+    const input = findTargetInput();
+    if (!input) {
+        showStatus("⚠️ Pehle kisi comment box par click karein!", true);
+        return;
+    }
+
+    showStatus("⚡ AI Comment Generate ho raha hai...");
+
+    let caption = "";
+    const elements = document.querySelectorAll('h1, span, p');
+    for (let el of elements) {
+        if (el.innerText && el.innerText.length > 20) {
+            caption = el.innerText;
+            break;
+        }
+    }
+
+    chrome.runtime.sendMessage(
+        { action: "GENERATE_COMMENT", caption: caption },
+        (response) => {
+            if (chrome.runtime.lastError) {
+                showStatus("❌ Extension reload hua. Tab Refresh karein!", true);
                 return;
             }
-
-            try {
-                const comment = await callGeminiAPI(request.caption, apiKey);
-                sendResponse({ success: true, comment: comment });
-            } catch (err) {
-                console.error("Gemini Fetch Error Details:", err);
-                sendResponse({ success: false, error: err.message || "API_FAILED" });
+            if (response && response.success) {
+                writeText(input, response.comment);
+                showStatus("✅ AI Comment Inserted!");
+            } else if (response && response.error === "NO_KEY") {
+                showStatus("⚠️ Extension Icon par click karke Key Save karein!", true);
+            } else {
+                showStatus(`❌ Error: ${response?.error || "Failed"}`, true);
             }
-        });
-        return true;
-    }
-});
-
-async function callGeminiAPI(captionText, apiKey) {
-    // Model updated to gemini-2.5-flash
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    
-    const prompt = `Aap ek Instagram engagement expert hain. Niche di gayi reel caption ko padhein aur ek bahut hi pyara, positive, short aur aesthetic Hinglish comment likhein (1-2 lines with relevant emojis). Direct comment response dein without quotation marks.\nCaption: ${captionText || "General creative post"}`;
-
-    const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents: [{
-                parts: [{ text: prompt }]
-            }]
-        })
-    });
-
-    if (!response.ok) {
-        const errJson = await response.json().catch(() => ({}));
-        const message = errJson.error?.message || `HTTP ${response.status}`;
-        throw new Error(message);
-    }
-
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text.trim();
+        }
+    );
 }
+
+// Fixed High-Visibility Floating Button
+function ensureButtonExists() {
+    if (document.getElementById('insta-ai-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'insta-ai-btn';
+    btn.innerHTML = '✨ AI Comment';
+    btn.style.cssText = `
+        position: fixed !important;
+        bottom: 80px !important;
+        right: 25px !important;
+        z-index: 2147483647 !important;
+        padding: 12px 20px !important;
+        background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 25px !important;
+        font-family: sans-serif !important;
+        font-weight: bold !important;
+        font-size: 14px !important;
+        cursor: pointer !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;
+        display: block !important;
+    `;
+
+    btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        generateCommentAction();
+    };
+
+    (document.body || document.documentElement).appendChild(btn);
+}
+
+// Continuous check for Instagram SPA DOM updates
+setInterval(ensureButtonExists, 1000);
+
+window.addEventListener('keydown', (e) => {
+    if (e.altKey && (e.key === 'c' || e.key === 'C')) {
+        e.preventDefault();
+        generateCommentAction();
+    }
+}, true);
