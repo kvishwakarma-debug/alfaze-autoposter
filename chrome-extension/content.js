@@ -1,24 +1,17 @@
-// Floating Notification Badge
-function showStatusBadge(message, isError = false) {
-    let badge = document.getElementById('insta-ai-status-badge');
+console.log("Insta AI Assistant Loaded Successfully v2.0");
+
+// Status Badge Notification
+function showStatus(text, isError = false) {
+    let badge = document.getElementById('insta-ai-badge');
     if (!badge) {
         badge = document.createElement('div');
-        badge.id = 'insta-ai-status-badge';
-        badge.style.position = 'fixed';
-        badge.style.bottom = '20px';
-        badge.style.right = '20px';
-        badge.style.padding = '10px 16px';
-        badge.style.borderRadius = '8px';
-        badge.style.zIndex = '999999';
-        badge.style.fontFamily = 'sans-serif';
-        badge.style.fontSize = '13px';
-        badge.style.fontWeight = 'bold';
-        badge.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        badge.id = 'insta-ai-badge';
+        badge.style.cssText = 'position:fixed; bottom:20px; right:20px; padding:12px 18px; border-radius:8px; z-index:999999; font-family:sans-serif; font-size:14px; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.2); transition:all 0.3s;';
         document.body.appendChild(badge);
     }
-    badge.style.backgroundColor = isError ? '#EF4444' : '#10B981';
+    badge.style.backgroundColor = isError ? '#DC2626' : '#059669';
     badge.style.color = '#FFFFFF';
-    badge.innerText = message;
+    badge.innerText = text;
     badge.style.display = 'block';
 
     setTimeout(() => {
@@ -26,41 +19,18 @@ function showStatusBadge(message, isError = false) {
     }, 3500);
 }
 
-// Target Comment Box Detector (Finds Textarea or Contenteditable Div)
-function getActiveCommentBox() {
-    let active = document.activeElement;
-    
-    // 1. Direct active typing element check
-    if (active && (
-        active.tagName === 'TEXTAREA' || 
-        active.tagName === 'INPUT' || 
-        active.isContentEditable || 
-        active.getAttribute('role') === 'textbox'
-    )) {
-        return active;
+// Active Target Detector
+function findTargetInput() {
+    const el = document.activeElement;
+    if (el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.isContentEditable || el.getAttribute('role') === 'textbox')) {
+        return el;
     }
-
-    // 2. Fallback selector search on page
-    const selectors = [
-        'textarea[aria-label*="comment" i]',
-        'textarea[placeholder*="comment" i]',
-        'textarea',
-        'div[contenteditable="true"]',
-        'div[role="textbox"]'
-    ];
-
-    for (let sel of selectors) {
-        const el = document.querySelector(sel);
-        if (el) return el;
-    }
-
-    return null;
+    return document.querySelector('textarea') || document.querySelector('div[contenteditable="true"]') || document.querySelector('div[role="textbox"]');
 }
 
-// Text Injection for all input types
-function injectComment(target, text) {
+// Universal Text Injector
+function writeText(target, text) {
     target.focus();
-
     if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
         const start = target.selectionStart || 0;
         const end = target.selectionEnd || 0;
@@ -69,8 +39,6 @@ function injectComment(target, text) {
         target.dispatchEvent(new Event('change', { bubbles: true }));
         return;
     }
-
-    // Rich-text/Contenteditable inputs
     try {
         document.execCommand('insertText', false, text);
     } catch (e) {
@@ -79,46 +47,43 @@ function injectComment(target, text) {
     target.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-// Shortcut Listener (Alt + C)
+// Alt + C Listener
 window.addEventListener('keydown', (e) => {
     if (e.altKey && (e.key === 'c' || e.key === 'C')) {
         e.preventDefault();
+        e.stopPropagation();
 
-        const commentBox = getActiveCommentBox();
-        
-        if (!commentBox) {
-            showStatusBadge("⚠️ Pehle comment box me cursor place karein!", true);
+        const input = findTargetInput();
+        if (!input) {
+            showStatus("⚠️ Pehle comment box me click karein!", true);
             return;
         }
 
-        showStatusBadge("⚡ Generating AI Comment...");
+        showStatus("⚡ Generating AI Comment...");
 
-        // Caption Extraction
         let caption = "";
-        const spanElements = document.querySelectorAll('h1, span, p');
-        for (let el of spanElements) {
+        const elements = document.querySelectorAll('h1, span, p');
+        for (let el of elements) {
             if (el.innerText && el.innerText.length > 20) {
                 caption = el.innerText;
                 break;
             }
         }
 
-        // Send to Background Script
         chrome.runtime.sendMessage(
             { action: "GENERATE_COMMENT", caption: caption },
             (response) => {
                 if (chrome.runtime.lastError) {
-                    showStatusBadge("❌ Extension Context Error! Tab refresh karein.", true);
+                    showStatus("❌ Refresh Instagram Tab (Context Reset)", true);
                     return;
                 }
-
                 if (response && response.success) {
-                    injectComment(commentBox, response.comment);
-                    showStatusBadge("✅ Comment Typed Successfully!");
+                    writeText(input, response.comment);
+                    showStatus("✅ Comment Generated!");
                 } else if (response && response.error === "NO_KEY") {
-                    showStatusBadge("⚠️ Extension Icon par click karke Key save karein!", true);
+                    showStatus("⚠️ Extension icon par click karke Key Save karein!", true);
                 } else {
-                    showStatusBadge("❌ API Error! Gemini Key check karein.", true);
+                    showStatus("❌ API Error! Gemini Key verify karein.", true);
                 }
             }
         );
