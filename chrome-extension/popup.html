@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
   <style>
-    body { width: 220px; font-family: sans-serif; padding: 12px; margin: 0; }
-    h4 { margin: 0 0 8px 0; font-size: 14px; }
-    label { font-size: 11px; color: #555; }
-    input { width: 100%; padding: 6px; margin: 6px 0 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-    button { width: 100%; padding: 7px; background: #0095f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    button:hover { background: #0081d6; }
-    #status { color: #10B981; font-size: 11px; margin-top: 6px; text-align: center; }
+    body { width: 280px; padding: 15px; font-family: Arial, sans-serif; background: #fafafa; }
+    h3 { margin: 0 0 10px 0; color: #d62976; text-align: center; font-size: 16px; }
+    input, button, textarea { width: 100%; box-sizing: border-box; margin-bottom: 8px; }
+    input, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 12px; }
+    button { padding: 10px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    button:hover { opacity: 0.9; }
+    #status { font-size: 11px; text-align: center; margin-top: 5px; font-weight: bold; word-break: break-all; }
   </style>
 </head>
 <body>
-  <h4>Insta AI Settings</h4>
-  <label for="apiKey">Gemini API Key:</label>
-  <input type="password" id="apiKey" placeholder="AIzaSy..." />
-  <button id="saveBtn">Save Key</button>
+  <h3>✨ Insta AI Commenter</h3>
+  <input type="password" id="apiKey" placeholder="Paste Gemini API Key">
+  <button id="saveKey">Save Key</button>
+  <hr style="margin: 10px 0; border: none; border-top: 1px solid #ddd;">
+  <textarea id="caption" rows="3" placeholder="Optional: Paste post caption or leave empty..."></textarea>
+  <button id="generateBtn">🚀 Generate & Copy Comment</button>
   <div id="status"></div>
 
   <script src="popup.js"></script>
