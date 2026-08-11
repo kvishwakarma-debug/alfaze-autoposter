@@ -1,27 +1,4 @@
-// Safe Message Passing Helper (No Direct Storage Read)
-function getApiKey() {
-    return new Promise((resolve) => {
-        try {
-            if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
-                chrome.runtime.sendMessage({ action: "GET_GEMINI_KEY" }, (response) => {
-                    if (chrome.runtime.lastError) {
-                        console.warn("Runtime message error:", chrome.runtime.lastError.message);
-                        resolve(null);
-                    } else {
-                        resolve(response ? response.apiKey : null);
-                    }
-                });
-            } else {
-                resolve(null);
-            }
-        } catch (e) {
-            console.error("Message Error:", e);
-            resolve(null);
-        }
-    });
-}
-
-// Status Indicator Banner
+// Floating Notification Badge
 function showStatusBadge(message, isError = false) {
     let badge = document.getElementById('insta-ai-status-badge');
     if (!badge) {
@@ -46,11 +23,11 @@ function showStatusBadge(message, isError = false) {
 
     setTimeout(() => {
         if (badge) badge.style.display = 'none';
-    }, 3000);
+    }, 3500);
 }
 
-// Robust Text Injection Function
-function injectTextIntoElement(target, text) {
+// Text Injection in active element
+function injectComment(target, text) {
     target.focus();
 
     if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
@@ -70,47 +47,21 @@ function injectTextIntoElement(target, text) {
     target.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-// Gemini API Request
-async function generateComment(captionText, apiKey) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    const prompt = `Aap ek Instagram engagement expert hain. Niche di gayi reel caption ko padhein aur ek bahut hi pyara, positive, short aur aesthetic Hinglish comment likhein (1-2 lines with relevant emojis). No quotation marks.\nCaption: ${captionText || "General creative post"}`;
-
-    const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    });
-
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text.trim();
-}
-
-// Shortcut Keyboard Listener
-window.addEventListener('keydown', async (e) => {
+// Keydown Listener (Alt + C)
+window.addEventListener('keydown', (e) => {
     if (e.altKey && (e.key === 'c' || e.key === 'C')) {
         e.preventDefault();
-        e.stopPropagation();
 
         const activeEl = document.activeElement;
         
-        if (!activeEl || activeEl === document.body) {
+        if (!activeEl || activeEl === document.body || activeEl.tagName === 'HTML') {
             showStatusBadge("⚠️ Pehle Comment box par click karein!", true);
             return;
         }
 
         showStatusBadge("⚡ Generating AI Comment...");
 
-        const apiKey = await getApiKey();
-        if (!apiKey) {
-            showStatusBadge("⚠️ Key nahi mili! Popup khol kar Save Key button press karein.", true);
-            return;
-        }
-
-        // Caption fetch
+        // Caption extract karein
         let caption = "";
         const spanElements = document.querySelectorAll('h1, span, p');
         for (let el of spanElements) {
@@ -120,13 +71,24 @@ window.addEventListener('keydown', async (e) => {
             }
         }
 
-        try {
-            const commentText = await generateComment(caption, apiKey);
-            injectTextIntoElement(activeEl, commentText);
-            showStatusBadge("✅ Comment Inserted!");
-        } catch (err) {
-            console.error(err);
-            showStatusBadge("❌ API Error! Check Gemini Key.", true);
-        }
+        // Background script se communication
+        chrome.runtime.sendMessage(
+            { action: "GENERATE_COMMENT", caption: caption },
+            (response) => {
+                if (chrome.runtime.lastError) {
+                    showStatusBadge("❌ Extension Context Error! Tab refresh karein.", true);
+                    return;
+                }
+
+                if (response && response.success) {
+                    injectComment(activeEl, response.comment);
+                    showStatusBadge("✅ Comment Typed Successfully!");
+                } else if (response && response.error === "NO_KEY") {
+                    showStatusBadge("⚠️ Extension Icon par click karke Key save karein!", true);
+                } else {
+                    showStatusBadge("❌ API Error! Gemini Key check karein.", true);
+                }
+            }
+        );
     }
 }, true);
