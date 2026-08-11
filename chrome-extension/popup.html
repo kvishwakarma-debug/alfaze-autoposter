@@ -3,22 +3,83 @@
 <head>
   <meta charset="utf-8">
   <style>
-    body { width: 280px; padding: 15px; font-family: Arial, sans-serif; background: #fafafa; }
-    h3 { margin: 0 0 10px 0; color: #d62976; text-align: center; font-size: 16px; }
-    input, button, textarea { width: 100%; box-sizing: border-box; margin-bottom: 8px; }
-    input, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 12px; }
-    button { padding: 10px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-    button:hover { opacity: 0.9; }
-    #status { font-size: 11px; text-align: center; margin-top: 5px; font-weight: bold; word-break: break-all; }
+    body {
+      width: 280px;
+      padding: 15px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      margin: 0;
+    }
+    h3 {
+      margin: 0 0 12px 0;
+      color: #dc2743;
+      text-align: center;
+      font-size: 16px;
+    }
+    label {
+      font-size: 12px;
+      font-weight: bold;
+      color: #333;
+      display: block;
+      margin-bottom: 4px;
+    }
+    input, button, textarea {
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+    input, textarea {
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 12px;
+      outline: none;
+    }
+    input:focus, textarea:focus {
+      border-color: #e6683c;
+    }
+    button {
+      padding: 10px;
+      background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    #saveKey {
+      background: #0095f6;
+      margin-bottom: 12px;
+    }
+    #status {
+      font-size: 11px;
+      text-align: center;
+      margin-top: 5px;
+      font-weight: bold;
+      line-height: 1.4;
+      word-break: break-word;
+    }
   </style>
 </head>
 <body>
   <h3>✨ Insta AI Commenter</h3>
-  <input type="password" id="apiKey" placeholder="Paste Gemini API Key">
+  
+  <label for="apiKey">Gemini API Key:</label>
+  <input type="password" id="apiKey" placeholder="Paste Gemini API Key here">
   <button id="saveKey">Save Key</button>
-  <hr style="margin: 10px 0; border: none; border-top: 1px solid #ddd;">
-  <textarea id="caption" rows="3" placeholder="Optional: Paste post caption or leave empty..."></textarea>
+
+  <hr style="margin: 10px 0; border: none; border-top: 1px solid #eee;">
+
+  <label for="caption">Post Context / Caption:</label>
+  <textarea id="caption" rows="2" placeholder="Paste post text or leave blank for general comment..."></textarea>
+  
   <button id="generateBtn">🚀 Generate & Copy Comment</button>
+
   <div id="status"></div>
 
   <script src="popup.js"></script>
