@@ -5,6 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch: # <--- Isse Manual Run (Run workflow) ka button dikhega
 
 jobs:
   build:
