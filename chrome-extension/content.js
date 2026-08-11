@@ -26,7 +26,38 @@ function showStatusBadge(message, isError = false) {
     }, 3500);
 }
 
-// Text Injection in active element
+// Target Comment Box Detector (Finds Textarea or Contenteditable Div)
+function getActiveCommentBox() {
+    let active = document.activeElement;
+    
+    // 1. Direct active typing element check
+    if (active && (
+        active.tagName === 'TEXTAREA' || 
+        active.tagName === 'INPUT' || 
+        active.isContentEditable || 
+        active.getAttribute('role') === 'textbox'
+    )) {
+        return active;
+    }
+
+    // 2. Fallback selector search on page
+    const selectors = [
+        'textarea[aria-label*="comment" i]',
+        'textarea[placeholder*="comment" i]',
+        'textarea',
+        'div[contenteditable="true"]',
+        'div[role="textbox"]'
+    ];
+
+    for (let sel of selectors) {
+        const el = document.querySelector(sel);
+        if (el) return el;
+    }
+
+    return null;
+}
+
+// Text Injection for all input types
 function injectComment(target, text) {
     target.focus();
 
@@ -39,6 +70,7 @@ function injectComment(target, text) {
         return;
     }
 
+    // Rich-text/Contenteditable inputs
     try {
         document.execCommand('insertText', false, text);
     } catch (e) {
@@ -47,21 +79,21 @@ function injectComment(target, text) {
     target.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-// Keydown Listener (Alt + C)
+// Shortcut Listener (Alt + C)
 window.addEventListener('keydown', (e) => {
     if (e.altKey && (e.key === 'c' || e.key === 'C')) {
         e.preventDefault();
 
-        const activeEl = document.activeElement;
+        const commentBox = getActiveCommentBox();
         
-        if (!activeEl || activeEl === document.body || activeEl.tagName === 'HTML') {
-            showStatusBadge("⚠️ Pehle Comment box par click karein!", true);
+        if (!commentBox) {
+            showStatusBadge("⚠️ Pehle comment box me cursor place karein!", true);
             return;
         }
 
         showStatusBadge("⚡ Generating AI Comment...");
 
-        // Caption extract karein
+        // Caption Extraction
         let caption = "";
         const spanElements = document.querySelectorAll('h1, span, p');
         for (let el of spanElements) {
@@ -71,7 +103,7 @@ window.addEventListener('keydown', (e) => {
             }
         }
 
-        // Background script se communication
+        // Send to Background Script
         chrome.runtime.sendMessage(
             { action: "GENERATE_COMMENT", caption: caption },
             (response) => {
@@ -81,7 +113,7 @@ window.addEventListener('keydown', (e) => {
                 }
 
                 if (response && response.success) {
-                    injectComment(activeEl, response.comment);
+                    injectComment(commentBox, response.comment);
                     showStatusBadge("✅ Comment Typed Successfully!");
                 } else if (response && response.error === "NO_KEY") {
                     showStatusBadge("⚠️ Extension Icon par click karke Key save karein!", true);
