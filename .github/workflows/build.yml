@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch: # <--- Isse Manual Run (Run workflow) ka button dikhega
+  workflow_dispatch:
 
 jobs:
   build:
@@ -17,13 +17,22 @@ jobs:
 
     - name: Validate Manifest JSON
       run: |
-        python3 -c "import json; json.load(open('chrome-extension/manifest.json'))"
+        if [ -f "manifest.json" ]; then
+          python3 -c "import json; json.load(open('manifest.json'))"
+        elif [ -f "chrome-extension/manifest.json" ]; then
+          python3 -c "import json; json.load(open('chrome-extension/manifest.json'))"
+        else
+          echo "Manifest file not found!" && exit 1
+        fi
         echo "Manifest JSON format is valid!"
 
     - name: Create Extension Package (ZIP)
       run: |
-        cd chrome-extension
-        zip -r ../insta-ai-extension.zip .
+        if [ -d "chrome-extension" ]; then
+          cd chrome-extension && zip -r ../insta-ai-extension.zip .
+        else
+          zip -r insta-ai-extension.zip . -x "*.git*" ".github/*"
+        fi
 
     - name: Upload Extension Artifact
       uses: actions/upload-artifact@v4
