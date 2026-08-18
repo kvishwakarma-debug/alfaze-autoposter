@@ -1,7 +1,5 @@
-// Background Worker: Messages listen karega
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "GENERATE_COMMENT") {
-        // Storage se safe Key fetching
         chrome.storage.local.get(['gemini_key'], async (result) => {
             const apiKey = result.gemini_key;
             if (!apiKey) {
@@ -16,14 +14,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 sendResponse({ success: false, error: err.message });
             }
         });
-        return true; // Asynchronous response ke liye mandatory hai
+        return true; // Keep message channel open for async response
     }
 });
 
-// Gemini API Fetch Function
 async function callGeminiAPI(captionText, apiKey) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    const prompt = `Aap ek Instagram engagement expert hain. Niche di gayi reel caption ko padhein aur ek bahut hi pyara, positive, short aur aesthetic Hinglish comment likhein (1-2 lines with relevant emojis). No quotation marks.\nCaption: ${captionText || "General creative post"}`;
+    const prompt = `Aap ek Instagram engagement expert hain. Niche di gayi reel/post caption ko padhein aur ek pyara, short aur aesthetic Hinglish comment likhein (1-2 lines with emojis). No quotes.\nCaption: ${captionText || "General post"}`;
 
     const response = await fetch(url, {
         method: "POST",
@@ -34,7 +31,8 @@ async function callGeminiAPI(captionText, apiKey) {
     });
 
     if (!response.ok) {
-        throw new Error("API Request Failed");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || "API Request Failed");
     }
 
     const data = await response.json();
