@@ -1,4 +1,21 @@
-console.log("Insta AI Script Injected & Ready");
+console.log("Insta AI Script Injected & Ready v7.0");
+
+let lastFocusedInput = null;
+
+// Track last clicked/focused comment box continuously
+document.addEventListener('focusin', (e) => {
+    const el = e.target;
+    if (el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.isContentEditable || el.getAttribute('role') === 'textbox')) {
+        lastFocusedInput = el;
+    }
+}, true);
+
+document.addEventListener('click', (e) => {
+    const el = e.target;
+    if (el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.isContentEditable || el.getAttribute('role') === 'textbox')) {
+        lastFocusedInput = el;
+    }
+}, true);
 
 function showStatus(text, isError = false) {
     let badge = document.getElementById('insta-ai-badge');
@@ -17,13 +34,18 @@ function showStatus(text, isError = false) {
 }
 
 function findTargetInput() {
+    if (lastFocusedInput && document.body.contains(lastFocusedInput)) {
+        return lastFocusedInput;
+    }
     const active = document.activeElement;
     if (active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT' || active.isContentEditable || active.getAttribute('role') === 'textbox')) {
         return active;
     }
     return document.querySelector('textarea') || 
            document.querySelector('div[contenteditable="true"]') || 
-           document.querySelector('div[role="textbox"]');
+           document.querySelector('div[role="textbox"]') ||
+           document.querySelector('form textarea') ||
+           document.querySelector('p[dir="ltr"]');
 }
 
 function writeText(target, text) {
@@ -36,6 +58,8 @@ function writeText(target, text) {
         target.dispatchEvent(new Event('change', { bubbles: true }));
         return;
     }
+    
+    // For ContentEditable / Custom Divs
     try {
         document.execCommand('insertText', false, text);
     } catch (e) {
@@ -105,6 +129,11 @@ function ensureButtonExists() {
         display: block !important;
     `;
 
+    // Prevent button click from unfocusing the input
+    btn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+    });
+
     btn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -115,3 +144,10 @@ function ensureButtonExists() {
 }
 
 setInterval(ensureButtonExists, 1000);
+
+window.addEventListener('keydown', (e) => {
+    if (e.altKey && (e.key === 'c' || e.key === 'C')) {
+        e.preventDefault();
+        generateCommentAction();
+    }
+}, true);
