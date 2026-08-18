@@ -19,32 +19,44 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function callGeminiAPI(captionText, apiKey) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     
-    const prompt = `Aap ek Instagram engagement expert hain. Post caption ke aadhar par ek short, aesthetic, friendly Hinglish comment generate karein (1-2 lines with emojis). Rules: Sirf final comment text return karein, koi quote ya extra explanation mat dein.\n\nCaption: ${captionText || "Nice post"}`;
+    // Random Seed for unique commentary every time
+    const randomId = Math.floor(Math.random() * 10000);
+    const prompt = `Act as a Gen-Z Instagram user. Write ONE short, aesthetic Hinglish comment (max 8-10 words, 1 emoji) for this caption. Make it unique and different every time [ID:${randomId}]. Do not wrap in quotes.\nCaption: ${captionText || "Cool post"}`;
 
     const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+                temperature: 0.95, // High creative randomness
+                maxOutputTokens: 40 // Super fast execution (Limits generation time to ~2sec)
+            }
         })
     });
 
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `API Error: ${response.status}`);
+        // Fallback to fast standard endpoint if needed
+        const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const fallbackResponse = await fetch(fallbackUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.9, maxOutputTokens: 40 }
+            })
+        });
+
+        if (!fallbackResponse.ok) {
+            throw new Error("API Request Failed");
+        }
+
+        const fallbackData = await fallbackResponse.json();
+        return fallbackData.candidates[0].content.parts[0].text.trim();
     }
 
     const data = await response.json();
-
-    // Extracting text safely from candidate response
-    const candidate = data.candidates?.[0];
-    const textPart = candidate?.content?.parts?.find(p => p.text)?.text;
-
-    if (textPart) {
-        return textPart.trim();
-    }
-
-    throw new Error("Valid text output nahi mila API se.");
+    return data.candidates[0].content.parts[0].text.trim();
 }
