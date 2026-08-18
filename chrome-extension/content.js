@@ -1,4 +1,4 @@
-console.log("Insta AI Script Injected & Ready v9.0");
+console.log("Insta AI Script Injected & Ready v11.0");
 
 function showStatus(text, isError = false) {
     let badge = document.getElementById('insta-ai-badge');
@@ -13,38 +13,54 @@ function showStatus(text, isError = false) {
     badge.innerText = text;
     badge.style.display = 'block';
 
-    setTimeout(() => { if (badge) badge.style.display = 'none'; }, 4000);
+    setTimeout(() => { if (badge) badge.style.display = 'none'; }, 3500);
+}
+
+// Scrapes currently active Reel / Post caption dynamically
+function getActiveReelCaption() {
+    // Check open Reel modal or current visible viewport caption
+    const activeDialog = document.querySelector('div[role="dialog"]');
+    const container = activeDialog || document;
+
+    // Direct Caption H1 / Spans
+    const h1 = container.querySelector('h1');
+    if (h1 && h1.innerText && h1.innerText.length > 5) {
+        return h1.innerText;
+    }
+
+    const spans = container.querySelectorAll('span[dir="auto"]');
+    for (let span of spans) {
+        const txt = span.innerText ? span.innerText.trim() : '';
+        const isAudio = txt.includes('Audio') || txt.includes('♫') || txt.includes('Original');
+        if (txt.length > 15 && !isAudio) {
+            return txt;
+        }
+    }
+
+    return "Aesthetic reel or post";
 }
 
 function generateCommentAction() {
-    showStatus("⚡ AI Comment Generate ho raha hai...");
+    showStatus("⚡ AI Comment Generating...");
 
-    let caption = "";
-    const elements = document.querySelectorAll('h1, span, p');
-    for (let el of elements) {
-        if (el.innerText && el.innerText.length > 20) {
-            caption = el.innerText;
-            break;
-        }
-    }
+    const caption = getActiveReelCaption();
 
     chrome.runtime.sendMessage(
         { action: "GENERATE_COMMENT", caption: caption },
         async (response) => {
             if (chrome.runtime.lastError) {
-                showStatus("❌ Extension reload hua. Tab Refresh karein!", true);
+                showStatus("❌ Tab Refresh Karein!", true);
                 return;
             }
             if (response && response.success) {
                 try {
-                    // Direct Clipboard Copy
                     await navigator.clipboard.writeText(response.comment);
-                    showStatus(`✅ Copied: "${response.comment}" (Ab Ctrl + V Paste Karein!)`);
+                    showStatus(`✅ Copied: "${response.comment}" (Ctrl+V Paste)`);
                 } catch (err) {
                     showStatus(`✅ Generated: ${response.comment}`);
                 }
             } else if (response && response.error === "NO_KEY") {
-                showStatus("⚠️ Extension Icon par click karke Key Save karein!", true);
+                showStatus("⚠️ Extension Icon se Key Save karein!", true);
             } else {
                 showStatus(`❌ Error: ${response?.error || "Failed"}`, true);
             }
@@ -87,7 +103,6 @@ function ensureButtonExists() {
 
 setInterval(ensureButtonExists, 1000);
 
-// Global Shortcut: Alt + C
 window.addEventListener('keydown', (e) => {
     if (e.altKey && (e.key === 'c' || e.key === 'C')) {
         e.preventDefault();
