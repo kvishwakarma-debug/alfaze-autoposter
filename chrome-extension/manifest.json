@@ -8,9 +8,23 @@
     "scripting"
   ],
   "host_permissions": [
-    "<all_urls>"
+    "https://*.instagram.com/*",
+    "https://generativelanguage.googleapis.com/*"
   ],
   "action": {
     "default_popup": "popup.html"
-  }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.instagram.com/*",
+        "https://instagram.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
 }
