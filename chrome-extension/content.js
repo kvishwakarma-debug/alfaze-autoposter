@@ -1,21 +1,24 @@
-console.log("Insta AI Script Injected & Ready v7.0");
+console.log("Insta AI Script Injected & Ready v8.0");
 
 let lastFocusedInput = null;
 
-// Track last clicked/focused comment box continuously
+// Track active focus or clicks across all elements
 document.addEventListener('focusin', (e) => {
-    const el = e.target;
-    if (el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.isContentEditable || el.getAttribute('role') === 'textbox')) {
-        lastFocusedInput = el;
-    }
+    if (isCommentInput(e.target)) lastFocusedInput = e.target;
 }, true);
 
 document.addEventListener('click', (e) => {
-    const el = e.target;
-    if (el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.isContentEditable || el.getAttribute('role') === 'textbox')) {
-        lastFocusedInput = el;
-    }
+    if (isCommentInput(e.target)) lastFocusedInput = e.target;
 }, true);
+
+function isCommentInput(el) {
+    if (!el) return false;
+    const tag = el.tagName ? el.tagName.toUpperCase() : '';
+    const role = el.getAttribute ? el.getAttribute('role') : '';
+    const contentEditable = el.isContentEditable || el.getAttribute('contenteditable') === 'true';
+    
+    return tag === 'TEXTAREA' || tag === 'INPUT' || contentEditable || role === 'textbox';
+}
 
 function showStatus(text, isError = false) {
     let badge = document.getElementById('insta-ai-badge');
@@ -34,38 +37,59 @@ function showStatus(text, isError = false) {
 }
 
 function findTargetInput() {
+    // 1. Check last focused element
     if (lastFocusedInput && document.body.contains(lastFocusedInput)) {
         return lastFocusedInput;
     }
+
+    // 2. Check current activeElement
     const active = document.activeElement;
-    if (active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT' || active.isContentEditable || active.getAttribute('role') === 'textbox')) {
-        return active;
+    if (isCommentInput(active)) return active;
+
+    // 3. Search for Instagram's modern comment input elements
+    const selectors = [
+        'form textarea',
+        'textarea[aria-label*="comment"]',
+        'textarea[aria-label*="Comment"]',
+        'textarea[placeholder*="comment"]',
+        'textarea[placeholder*="Comment"]',
+        'div[role="textbox"]',
+        'div[contenteditable="true"]',
+        'p[dir="ltr"]',
+        'textarea'
+    ];
+
+    for (let selector of selectors) {
+        const found = document.querySelector(selector);
+        if (found) return found;
     }
-    return document.querySelector('textarea') || 
-           document.querySelector('div[contenteditable="true"]') || 
-           document.querySelector('div[role="textbox"]') ||
-           document.querySelector('form textarea') ||
-           document.querySelector('p[dir="ltr"]');
+
+    return null;
 }
 
 function writeText(target, text) {
     target.focus();
+
+    // Standard Inputs / Textareas
     if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
         const start = target.selectionStart || 0;
         const end = target.selectionEnd || 0;
         target.value = target.value.substring(0, start) + text + target.value.substring(end);
+        
+        // Dispatch React/DOM events
         target.dispatchEvent(new Event('input', { bubbles: true }));
         target.dispatchEvent(new Event('change', { bubbles: true }));
         return;
     }
-    
-    // For ContentEditable / Custom Divs
+
+    // Div ContentEditable / Paragraphs (New Instagram UI)
     try {
         document.execCommand('insertText', false, text);
     } catch (e) {
         target.innerText = text;
     }
     target.dispatchEvent(new Event('input', { bubbles: true }));
+    target.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
 function generateCommentAction() {
@@ -129,7 +153,7 @@ function ensureButtonExists() {
         display: block !important;
     `;
 
-    // Prevent button click from unfocusing the input
+    // Prevent button click from taking focus away
     btn.addEventListener('mousedown', (e) => {
         e.preventDefault();
     });
@@ -145,6 +169,7 @@ function ensureButtonExists() {
 
 setInterval(ensureButtonExists, 1000);
 
+// Global Shortcut: Alt + C
 window.addEventListener('keydown', (e) => {
     if (e.altKey && (e.key === 'c' || e.key === 'C')) {
         e.preventDefault();
