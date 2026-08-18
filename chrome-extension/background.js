@@ -19,10 +19,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function callGeminiAPI(captionText, apiKey) {
-    // API response ke according exact model endpoint: gemini-3.6-flash
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
     
-    const prompt = `Aap ek Instagram engagement expert hain. Niche di gayi caption ko padhein aur ek pyara, short aur aesthetic Hinglish comment likhein (1-2 lines with emojis). Return ONLY the comment text without quotes.\nCaption: ${captionText || "General post"}`;
+    const prompt = `Aap ek Instagram engagement expert hain. Post caption ke aadhar par ek short, aesthetic, friendly Hinglish comment generate karein (1-2 lines with emojis). Rules: Sirf final comment text return karein, koi quote ya extra explanation mat dein.\n\nCaption: ${captionText || "Nice post"}`;
 
     const response = await fetch(url, {
         method: "POST",
@@ -34,9 +33,18 @@ async function callGeminiAPI(captionText, apiKey) {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `API Request Failed (Status: ${response.status})`);
+        throw new Error(errorData.error?.message || `API Error: ${response.status}`);
     }
 
     const data = await response.json();
-    return data.candidates[0].content.parts[0].text.trim();
+
+    // Extracting text safely from candidate response
+    const candidate = data.candidates?.[0];
+    const textPart = candidate?.content?.parts?.find(p => p.text)?.text;
+
+    if (textPart) {
+        return textPart.trim();
+    }
+
+    throw new Error("Valid text output nahi mila API se.");
 }
