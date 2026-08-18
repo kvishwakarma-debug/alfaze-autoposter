@@ -14,21 +14,35 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 sendResponse({ success: false, error: err.message });
             }
         });
-        return true; // Keep message channel open for async response
+        return true; // Asynchronous channel open rakhne ke liye
     }
 });
 
 async function callGeminiAPI(captionText, apiKey) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    const prompt = `Aap ek Instagram engagement expert hain. Niche di gayi reel/post caption ko padhein aur ek pyara, short aur aesthetic Hinglish comment likhein (1-2 lines with emojis). No quotes.\nCaption: ${captionText || "General post"}`;
+    // Gemini 2.5 Flash / 2.0 Flash Endpoint (Updated Version)
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    
+    const prompt = `Aap ek Instagram engagement expert hain. Niche di gayi caption ko padhein aur ek pyara, short aur aesthetic Hinglish comment likhein (1-2 lines with emojis). Return ONLY the comment text without quotes.\nCaption: ${captionText || "General post"}`;
 
-    const response = await fetch(url, {
+    let response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }]
         })
     });
+
+    // Fallback model if 2.5-flash endpoint varies
+    if (!response.ok) {
+        const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        response = await fetch(fallbackUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
+        });
+    }
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
