@@ -1,4 +1,4 @@
-console.log("Insta AI Script Injected & Ready v6.0");
+console.log("Insta AI Script Injected & Ready");
 
 function showStatus(text, isError = false) {
     let badge = document.getElementById('insta-ai-badge');
@@ -81,7 +81,6 @@ function generateCommentAction() {
     );
 }
 
-// Fixed High-Visibility Floating Button
 function ensureButtonExists() {
     if (document.getElementById('insta-ai-btn')) return;
 
@@ -115,12 +114,4 @@ function ensureButtonExists() {
     (document.body || document.documentElement).appendChild(btn);
 }
 
-// Continuous check for Instagram SPA DOM updates
 setInterval(ensureButtonExists, 1000);
-
-window.addEventListener('keydown', (e) => {
-    if (e.altKey && (e.key === 'c' || e.key === 'C')) {
-        e.preventDefault();
-        generateCommentAction();
-    }
-}, true);
